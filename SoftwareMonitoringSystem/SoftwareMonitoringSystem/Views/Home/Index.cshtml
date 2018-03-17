@@ -1,9 +1,23 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿@if (Session["Logged"] != "Admin")
+{
+    {
+        ViewBag.Title = "Panel logowania";
+    }
 
-<div class="jumbotron">
-    <h2>System monitorujący</h2>
-    <p class="lead"> oprogramowanie komputerów w&nbspsieci lokalnej</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg"><b>Zaloguj&nbsp</b><span class="glyphicon glyphicon-log-in"></span></a></p>
-</div>
+    <div class="jumbotron">
+        <div class="container">
+            <h2>System monitorujący</h2>
+            <p class="lead">oprogramowanie komputerów w&nbspsieci lokalnej</p>
+        </div>
+    </div>
+    using (Html.BeginForm("Login", "Home", FormMethod.Post))
+    {
+        <div>
+            <button type="submit" class="btn btn-primary"><b>Zaloguj&nbsp</b><span class="glyphicon glyphicon-log-in"></span></button>
+        </div>
+    }
+}
+else
+{
+    @Html.Partial("MainAdmin")
+}
