@@ -10,6 +10,14 @@ namespace SoftwareMonitoringSystem.Controllers
     {
         public ActionResult Index()
         {
+            //only for checking
+            var db = new SMSDBContext();
+            Admin admin = new Admin();
+            admin.Username = "Admin";
+            admin.Password = "123456";
+            db.Admins.Add(admin);
+            db.SaveChanges();
+            var admins = db.Admins.ToList();
             return View();
         }
 

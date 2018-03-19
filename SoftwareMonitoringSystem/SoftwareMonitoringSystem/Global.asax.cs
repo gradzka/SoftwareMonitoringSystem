@@ -16,6 +16,10 @@ namespace SoftwareMonitoringSystem
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            //| PathToDB |\SMSDB.sqlite : https://stackoverflow.com/a/6941582
+            string startupPath = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\";
+            AppDomain.CurrentDomain.SetData("DataDirectory", startupPath);
         }
     }
 }
