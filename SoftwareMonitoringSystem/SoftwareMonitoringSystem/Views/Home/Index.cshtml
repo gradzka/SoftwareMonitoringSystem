@@ -5,12 +5,10 @@
         ViewBag.Title = "Panel logowania";
     }
 
-    <div class="row" style="padding-top:10px">
+    <div class="row" style="padding-top:30px">
         <div style="width:100%; text-align:center; padding-bottom:20px">
             <img src="~/Images/radar.png" style="max-width:50%; background-size:cover" alt="" />
-            <div style="overflow:hidden;">
                 <h2>Sieciowy skaner oprogramowania</h2>
-            </div>
         </div>
     </div>
 
@@ -35,14 +33,14 @@
                 <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
                     <button type="submit" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
                     <div style="overflow:hidden;padding-right:5px;">
-                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
+                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = ""} })
                     </div>
                 </div>
             </div>
         </div>
     }
 
-    <div class="row" style="padding-top:20px;text-align:center;">
+    <div class="row" style="padding-top:10px;text-align:center;">
         <h4 style="color:#9b9b9b">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h4>
     </div>
 }

@@ -47,14 +47,14 @@ namespace SoftwareMonitoringSystem.Controllers
                     {
                         byte[] hashBytePasswd = sha512.ComputeHash(bytePasswd); //512-bits
                         string hashBytePasswdHex = BitConverter.ToString(hashBytePasswd).Replace("-", string.Empty);
-                        if (loginData.login == loginDataDB.login && loginData.password == loginDataDB.password)
+                        if (loginData.login == loginDataDB.login && hashBytePasswdHex == loginDataDB.password)
                         {
                             return PartialView("_MainAdmin");//logged in
                         }
                     }
                 }
             }
-            return View("Index");//not logged in
+            return RedirectToAction("Index", "Home");
         }
     }
 }
