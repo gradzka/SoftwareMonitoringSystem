@@ -5,12 +5,15 @@
         ViewBag.Title = "Panel logowania";
     }
 
-    <div class="jumbotron">
-        <div class="container">
-            <h2>System monitorujący</h2>
-            <p class="lead">oprogramowanie komputerów w&nbspsieci lokalnej</p>
+    <div class="row" style="padding-top:10px">
+        <div style="width:100%; text-align:center; padding-bottom:20px">
+            <img src="~/Images/radar.png" style="max-width:50%; background-size:cover" alt="" />
+            <div style="overflow:hidden;">
+                <h2>Sieciowy skaner oprogramowania</h2>
+            </div>
         </div>
     </div>
+
     using (Html.BeginForm("Login", "Home", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
@@ -22,19 +25,26 @@
             </div>
         }
 
-        <div style="display:flex; flex-direction:column; align-items: center;">
-            <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
-                @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "min-width:250px;", @required = "" } })
-            </div>
+        <div class="panel" style="background-color:#f9f9f9; max-width:370px; margin-left:auto; margin-right:auto;">
+            <div class="panel-heading panel-default" style="padding-bottom:4px; padding-top:4px"><h4 style="text-align:center;">Panel logowania administratora</h4></div>
+            <div class="panel-body">
+                <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
+                    @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "max-width:none;", @required = "" } })
+                </div>
 
-            <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
-                @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "min-width:250px;", @required = "" } })
-            </div>
-            <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
-                <button type="submit" class="btn btn-primary" style="min-width:250px;"><b>Zaloguj&nbsp</b><span class="glyphicon glyphicon-log-in"></span></button>
+                <div class="form-group-10px" style="margin-bottom:5px;margin-top:5px;">
+                    <button type="submit" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
+                    <div style="overflow:hidden;padding-right:5px;">
+                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
+                    </div>
+                </div>
             </div>
         </div>
     }
+
+    <div class="row" style="padding-top:20px;text-align:center;">
+        <h4 style="color:#9b9b9b">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h4>
+    </div>
 }
 else
 {
