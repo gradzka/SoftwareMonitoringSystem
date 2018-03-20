@@ -115,7 +115,7 @@ namespace SoftwareMonitoringSystem
         public int AdminID { get; set; }
         [MinLength(5), MaxLength(5), Required]
         public string Username { get; set; }
-        [MaxLength(64), Required]
+        [MaxLength(128), Required]
         public string Password { get; set; }
         [Required, Range(0, 3)]
         public int LogInAttemptCounter { get; set; }

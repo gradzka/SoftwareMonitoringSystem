@@ -1,6 +1,9 @@
-﻿using System;
+﻿using SoftwareMonitoringSystem.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
@@ -10,14 +13,10 @@ namespace SoftwareMonitoringSystem.Controllers
     {
         public ActionResult Index()
         {
-            //only for checking
-            var db = new SMSDBContext();
-            Admin admin = new Admin();
-            admin.Username = "Admin";
-            admin.Password = "123456";
-            db.Admins.Add(admin);
-            db.SaveChanges();
-            var admins = db.Admins.ToList();
+            using (var db = new SMSDBContext())
+            {
+                db.Admins.ToList();
+            }
             return View();
         }
 
@@ -33,6 +32,29 @@ namespace SoftwareMonitoringSystem.Controllers
             ViewBag.Message = "Your contact page.";
 
             return View();
+        }
+
+        [HttpPost]
+        public ActionResult LogIn(Login loginData)
+        {
+            using (var dbContext = new SMSDBContext())
+            {
+                Login loginDataDB = dbContext.Admins.Select(x => new Login{ login = x.Username, password = x.Password }).FirstOrDefault();
+                if (loginDataDB != null)
+                {
+                    byte[] bytePasswd = Encoding.Default.GetBytes(loginData.password);
+                    using (var sha512 = SHA512.Create())
+                    {
+                        byte[] hashBytePasswd = sha512.ComputeHash(bytePasswd); //512-bits
+                        string hashBytePasswdHex = BitConverter.ToString(hashBytePasswd).Replace("-", string.Empty);
+                        if (loginData.login == loginDataDB.login && loginData.password == loginDataDB.password)
+                        {
+                            return PartialView("_MainAdmin");//logged in
+                        }
+                    }
+                }
+            }
+            return View("Index");//not logged in
         }
     }
 }
