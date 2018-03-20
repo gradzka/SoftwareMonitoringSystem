@@ -34,7 +34,7 @@ namespace SoftwareMonitoringSystem.Controllers
             return View();
         }
 
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         public ActionResult LogIn(Login loginData)
         {
             using (var dbContext = new SMSDBContext())
