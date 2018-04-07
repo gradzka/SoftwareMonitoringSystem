@@ -1,1 +1,110 @@
-﻿<h1>Zalogowany</h1>
+﻿<!--model SoftwareMonitoringSystem.Models.Login-->
+@{
+    ViewBag.Title = "Strona główna";
+}
+
+<div style="margin-top:20px;margin-bottom:20px;">
+    @Html.ActionLink("Skanuj urządzenia", "Method", "Controller", null, new { @class = "btn btn-primary", @style = "float:right;" })
+    <button type="submit" title="Wyszukaj urządzenia" class="btn btn-primary" style="float:right;">Wyszukaj urządzenia <span class="glyphicon glyphicon-search"></span></button>
+    <div style="overflow:hidden;">
+        <h2 style="margin:0px;">Zdefinowane urządzenia z&nbspagentami</h2>
+    </div>
+</div>
+
+@using (Html.BeginForm("AddDevice", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+
+    <table id="DeviceTable" class="table table-hover">
+        <tr>
+            <td></td>
+            <td>@Html.Editor("LPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "lp.", style = "max-width:50px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+            <td>@Html.Editor("MACFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "MAC address", style = "max-width:160px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+            <td>@Html.Editor("ManufacturerFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Manufacturer", style = "max-width:150px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+            <td>@Html.Editor("IPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "IP address", style = "max-width:140px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+            <td>@Html.Editor("DescriptionFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Description", style = "max-width:200px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>
+            </th>
+            <th>
+                lp.
+            </th>
+            <th>
+                MAC address
+            </th>
+            <th>
+                Manufacturer
+            </th>
+            <th>
+                IP address
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+            </th>
+
+        </tr>
+        @{
+            int counter = 1;
+            foreach (var item in new System.Collections.ArrayList())
+            {
+                <tr>
+                    <td align="center">
+                        @Html.CheckBox("Dev" + counter.ToString())
+                    </td>
+                    <td>@counter@{counter++;}
+                    </td>
+                    <td>
+                        <!--Html.DisplayFor(modelItem => item.TITLE)-->
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        @Html.ActionLink("Edytuj", "Edit", new { id = 1 /*item.ID_MOVIE*/ }, new { @class = "btn btn-primary", @style = "margin-top: 3px; margin-bottom: 7px" })
+                    </td>
+                </tr>
+            }
+
+            <tr>
+                <td align="center">
+                    @Html.CheckBox("Dev" + counter.ToString())
+                </td>
+                <td>@counter</td>
+                <td>FF:FF:FF:FF:FF:FF</td>
+                <td>TP-LINK</td>
+                <td>192.168.255.254</td>
+                <td>Room 12, PC 1</td>
+                <td>
+                    @Html.ActionLink("Nieaktywny", "ChangeActive", new { id = 1 /*item.ID_MOVIE*/ }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
+                </td>
+                <td>
+                    @Html.ActionLink("Edytuj", "Edit", new { id = 1 /*item.ID_MOVIE*/ }, new { @class = "btn btn-primary", @style = "margin-top: 3px; margin-bottom: 3px" })
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td></td>
+                <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "MAC address", style = "max-width:160px;", @required = "" } })</td>
+                <td>@Html.Editor("Manufacturer", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Manufacturer", style = "max-width:150px;", @required = "" } })</td>
+                <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "IP address", style = "max-width:140px;", @required = "" } })</td>
+                <td>@Html.Editor("Description", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Description", style = "max-width:200px;" } })</td>
+                <td colspan="2">
+                    <button type="submit" title="Dodaj nowe urządzenie" class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px" ;">Dodaj urządzenie&nbsp<span class="glyphicon glyphicon-plus"></span></button>
+                </td>
+            </tr>
+        }
+    </table>
+
+
+}
