@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title - SSO</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
-<body style="background-color:#eeeeee;">
+<body background="~/Images/equipment.png" style="background-color:white;background-repeat:no-repeat;background-size:cover;">
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -17,7 +17,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a href="@Url.Action("Index", "Home")" class="navbar-brand">
-                    <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-home" aria-hidden="true"></span> SSO
                 </a>
             </div>
         </div>
@@ -26,7 +26,7 @@
         @RenderBody()
         <hr />
         <footer style="text-align:center">
-            <p>&copy; @DateTime.Now.Year</p>
+            <p>Sieciowy skaner oprogramowania <br/> @DateTime.Now.Year</p>
         </footer>
     </div>
 
