@@ -13,11 +13,14 @@ namespace SoftwareMonitoringSystem.Controllers
     {
         public ActionResult Index()
         {
-            using (var db = new SMSDBContext())
+            if (Session["Logged"] == "Admin")
             {
-                db.Admins.ToList();
+                return RedirectToAction("GetDevices", "DevMGMT");
             }
-            return View();
+            else
+            { 
+                return View();
+            }
         }
 
         public ActionResult About()
@@ -49,7 +52,9 @@ namespace SoftwareMonitoringSystem.Controllers
                         string hashBytePasswdHex = BitConverter.ToString(hashBytePasswd).Replace("-", string.Empty);
                         if (loginData.login == loginDataDB.login && hashBytePasswdHex == loginDataDB.password)
                         {
-                            return PartialView("_MainAdmin");//logged in
+                            Session["Logged"] = "Admin";
+                            return RedirectToAction("Index", "Home");
+                            
                         }
                     }
                 }
