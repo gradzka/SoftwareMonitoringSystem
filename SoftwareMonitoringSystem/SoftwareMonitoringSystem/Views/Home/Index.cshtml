@@ -1,5 +1,14 @@
 ﻿@if (Session["Logged"] != "Admin")
 {
+    <!--https://stackoverflow.com/a/24505794-->
+    <style>
+        body {
+            background-image: url(../Images/equipment.png);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+
     @model SoftwareMonitoringSystem.Models.Login
     {
         ViewBag.Title = "Panel logowania";
@@ -22,27 +31,27 @@
             </div>
         }
 
-            <div class="panel" style="background-color:#f9f9f9; max-width:370px; margin-left:auto; margin-right:auto;">
-                <div class="panel-heading panel-default" style="padding-bottom:4px; padding-top:4px">
-                    <h4 style="text-align:center;">Panel logowania administratora</h4>
+        <div class="panel" style="background-color:#f9f9f9; max-width:370px; margin-left:auto; margin-right:auto;">
+            <div class="panel-heading panel-default" style="padding-bottom:4px; padding-top:4px">
+                <h4 style="text-align:center;">Panel logowania administratora</h4>
+            </div>
+            <div class="panel-body">
+                <div id="LoginInput" style="margin-bottom:5px;margin-top:5px;">
+                    @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "max-width:none;", @required = "" } })
                 </div>
-                <div class="panel-body">
-                    <div id="LoginInput" style="margin-bottom:5px;margin-top:5px;">
-                        @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "max-width:none;", @required = "" } })
+                <div style="margin-bottom:5px;margin-top:5px;">
+                    <div id="PassInput" style="float:left">
+                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
                     </div>
-                    <div style="margin-bottom:5px;margin-top:5px;">
-                        <div id="PassInput" style="float:left">
-                            @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
-                        </div>
-                        <button type="submit" id="LoginButton" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
-                    </div>
-                </div>
-                <div class="panel-footer panel-default">
-                    <h5 style="text-align:center;">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h5>
+                    <button type="submit" id="LoginButton" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
                 </div>
             </div>
+            <div class="panel-footer panel-default">
+                <h5 style="text-align:center;">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h5>
+            </div>
+        </div>
     }
-    
+
     @section Scripts {
         <script type="text/javascript">
             $(function () { resizePassInput(); });

@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - SSO</title>
     @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/AdjustedSite.css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
-<body background="~/Images/equipment.png" style="background-color:white;background-repeat:no-repeat;background-size:cover;">
+<body style="background-color:white;">
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -24,10 +25,11 @@
     </div>
     <div class="container body-content">
         @RenderBody()
-        <hr />
-        <footer style="text-align:center">
-            <p>Sieciowy skaner oprogramowania <br/> @DateTime.Now.Year</p>
-        </footer>
+        <div class="footer">
+            <strong>Sieciowy skaner oprogramowania</strong>
+            <br /> 
+            @DateTime.Now.Year
+        </div>
     </div>
 
     @Scripts.Render("~/bundles/jquery")
