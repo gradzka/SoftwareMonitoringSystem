@@ -23,7 +23,7 @@ namespace SoftwareMonitoringSystem.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                //FormsAuthentication.SignOut();
+                FormsAuthentication.SignOut();
                 return RedirectToAction("GetDevices", "DevMGMT");
             }
             return View();

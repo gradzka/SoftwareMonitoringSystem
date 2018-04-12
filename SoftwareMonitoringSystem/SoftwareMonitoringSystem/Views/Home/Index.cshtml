@@ -1,69 +1,66 @@
-﻿@if (Session["Logged"] != "Admin")
-{
-    <!--https://stackoverflow.com/a/24505794-->
-    <style>
-        body {
-            background-image: url(../Images/equipment.png);
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-    </style>
+﻿<!--https://stackoverflow.com/a/24505794-->
+<style>
+    body {
+        background-image: url(../Images/equipment.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
 
-    @model SoftwareMonitoringSystem.Models.Login
+@model SoftwareMonitoringSystem.Models.Login
+
+@{ViewBag.Title = "Panel logowania"; }
+
+
+<div class="row" style="padding-top:10px">
+    <div style="width:100%; text-align:center; padding-bottom:20px">
+
+    </div>
+</div>
+
+@using (Html.BeginForm("Login", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    if (ViewBag.Alert != null)
     {
-        ViewBag.Title = "Panel logowania";
+        <div class="alert alert-danger" style="text-align:center; margin-bottom:15px">
+            @ViewBag.Alert
+        </div>
     }
 
-    <div class="row" style="padding-top:10px">
-        <div style="width:100%; text-align:center; padding-bottom:20px">
-
+    <div class="panel" style="background-color:#f9f9f9; max-width:370px; margin-left:auto; margin-right:auto;">
+        <div class="panel-heading panel-default" style="padding-bottom:4px; padding-top:4px">
+            <h4 style="text-align:center;">Panel logowania administratora</h4>
+        </div>
+        <div class="panel-body">
+            <div id="LoginInput" style="margin-bottom:5px;margin-top:5px;">
+                @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "max-width:none;", @required = "" } })
+            </div>
+            <div style="margin-bottom:5px;margin-top:5px;">
+                <div id="PassInput" style="float:left">
+                    @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
+                </div>
+                <button type="submit" id="LoginButton" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
+            </div>
+        </div>
+        <div class="panel-footer panel-default">
+            <h5 style="text-align:center;">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h5>
         </div>
     </div>
+}
 
-    using (Html.BeginForm("Login", "Home", FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
+@section Scripts {
+    <script type="text/javascript">
+        $(function () { resizePassInput(); });
 
-        if (ViewBag.Alert != null)
-        {
-            <div class="alert alert-danger" style="text-align:center; margin-bottom:15px">
-                @ViewBag.Alert
-            </div>
+        $(window).resize(function () { resizePassInput(); });
+
+        function resizePassInput() {
+            var widthLogin = document.getElementById("LoginInput").clientWidth;
+            var widthButton = document.getElementById("LoginButton").clientWidth * 1.19;
+            widthLogin = widthLogin - widthButton;
+            document.getElementById("PassInput").style.width = widthLogin + "px";
         }
-
-        <div class="panel" style="background-color:#f9f9f9; max-width:370px; margin-left:auto; margin-right:auto;">
-            <div class="panel-heading panel-default" style="padding-bottom:4px; padding-top:4px">
-                <h4 style="text-align:center;">Panel logowania administratora</h4>
-            </div>
-            <div class="panel-body">
-                <div id="LoginInput" style="margin-bottom:5px;margin-top:5px;">
-                    @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control", @placeholder = "Login", @style = "max-width:none;", @required = "" } })
-                </div>
-                <div style="margin-bottom:5px;margin-top:5px;">
-                    <div id="PassInput" style="float:left">
-                        @Html.EditorFor(model => model.password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Hasło", @style = "max-width:none;", @required = "" } })
-                    </div>
-                    <button type="submit" id="LoginButton" title="Zaloguj" class="btn btn-primary" style="float:right;"><span class="glyphicon glyphicon-log-in"></span></button>
-                </div>
-            </div>
-            <div class="panel-footer panel-default">
-                <h5 style="text-align:center;">System monitorujący oprogramowanie komputerów w&nbspsieci lokalnej</h5>
-            </div>
-        </div>
-    }
-
-    @section Scripts {
-        <script type="text/javascript">
-            $(function () { resizePassInput(); });
-
-            $(window).resize(function () { resizePassInput(); });
-
-            function resizePassInput() {
-                var widthLogin = document.getElementById("LoginInput").clientWidth;
-                var widthButton = document.getElementById("LoginButton").clientWidth * 1.19;
-                widthLogin = widthLogin - widthButton;
-                document.getElementById("PassInput").style.width = widthLogin + "px";
-            }
-        </script>
-    }
+    </script>
 }

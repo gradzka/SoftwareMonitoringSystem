@@ -93,23 +93,6 @@
 
             <tr>
                 <td align="center">
-                    @Html.CheckBox("Dev" + counter.ToString())
-                </td>
-                <td>@counter</td>
-                <td>FF:FF:FF:FF:FF:FF</td>
-                <td>TP-LINK</td>
-                <td>192.168.255.254</td>
-                <td>Room 12, PC 1</td>
-                <td>
-                    @Html.ActionLink("Nieaktywny", "ChangeActive", new { id = 1 /*item.ID_MOVIE*/ }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
-                </td>
-                <td>
-                    @Html.ActionLink("Edytuj", "Edit", new { id = 1 /*item.ID_MOVIE*/ }, new { @class = "btn btn-primary", @style = "margin-top: 3px; margin-bottom: 3px" })
-                </td>
-            </tr>
-
-            <tr>
-                <td align="center">
                     @Html.CheckBox("Dev" + counter.ToString(), false, new { disabled = "disabled" })
                 </td>
                 <td></td>

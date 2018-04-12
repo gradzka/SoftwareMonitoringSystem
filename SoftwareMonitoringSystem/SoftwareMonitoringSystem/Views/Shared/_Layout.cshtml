@@ -21,6 +21,20 @@
                     <span class="glyphicon glyphicon-home" aria-hidden="true"></span> SSO
                 </a>
             </div>
+            @if(Request.IsAuthenticated)
+            {
+                <div class="navbar-collapse collapse">
+                    @using (Html.BeginForm("LogOut", "Home", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <ul class="nav navbar-nav navbar-right">
+                            <li style="background-color:transparent">
+                                <a href="javascript:document.getElementById('logoutForm').submit()"><span class="glyphicon glyphicon-log-out"></span> Wyloguj</a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            }
         </div>
     </div>
     <div class="container body-content">
