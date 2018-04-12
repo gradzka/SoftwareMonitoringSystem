@@ -6,6 +6,8 @@ using System.Web.Mvc;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
+    //equire authorization for all actions on the controller
+    [Authorize]
     public class DevMGMTController : Controller
     {
         // GET: DevMGMT

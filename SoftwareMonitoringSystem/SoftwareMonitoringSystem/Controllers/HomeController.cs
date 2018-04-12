@@ -6,21 +6,27 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using SoftwareMonitoringSystem.Infrastructure.Abstract;
+using SoftwareMonitoringSystem.Infrastructure.Concrete;
+using System.Web.Security;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
     public class HomeController : Controller
     {
+        IAuthProvider authProvider;
+        public HomeController()
+        {
+            authProvider = new FormsAuthProvider();
+        }
         public ActionResult Index()
         {
-            if (Session["Logged"] == "Admin")
+            if (Request.IsAuthenticated)
             {
+                //FormsAuthentication.SignOut();
                 return RedirectToAction("GetDevices", "DevMGMT");
             }
-            else
-            { 
-                return View();
-            }
+            return View();
         }
 
         public ActionResult About()
@@ -40,23 +46,11 @@ namespace SoftwareMonitoringSystem.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult LogIn(Login loginData)
         {
-            using (var dbContext = new SMSDBContext())
+            if (ModelState.IsValid)
             {
-                Login loginDataDB = dbContext.Admins.Select(x => new Login{ login = x.Username, password = x.Password }).FirstOrDefault();
-                if (loginDataDB != null)
+                if (authProvider.Authenticate(loginData))
                 {
-                    byte[] bytePasswd = Encoding.Default.GetBytes(loginData.password);
-                    using (var sha512 = SHA512.Create())
-                    {
-                        byte[] hashBytePasswd = sha512.ComputeHash(bytePasswd); //512-bits
-                        string hashBytePasswdHex = BitConverter.ToString(hashBytePasswd).Replace("-", string.Empty);
-                        if (loginData.login == loginDataDB.login && hashBytePasswdHex == loginDataDB.password)
-                        {
-                            Session["Logged"] = "Admin";
-                            return RedirectToAction("Index", "Home");
-                            
-                        }
-                    }
+                    return RedirectToAction("GetDevices", "DevMGMT");
                 }
             }
             return RedirectToAction("Index", "Home");
