@@ -17,9 +17,9 @@ namespace SoftwareMonitoringSystem.Controllers
             using (var dbContext = new SMSDBContext())
             {
                 Device device = new Device();
-                device.MACAddress = "12-a2-12-a3-12-a2";
-                device.Manufacturer = "Lenovo";
-                device.IPAddress = "192.168.9.54";
+                device.MACAddress = "11-a2-12-a3-12-a2";
+                device.Manufacturer = "Acer";
+                device.IPAddress = "192.168.9.53";
                 device.Description = "Work device";
                 dbContext.Devices.Add(device);
                 dbContext.SaveChanges();

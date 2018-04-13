@@ -3,109 +3,100 @@
     ViewBag.Title = "Strona główna";
 }
 
-<div style="margin-top:20px;margin-bottom:20px;">
-    @Html.ActionLink("Skanuj urządzenia", "Method", "Controller", null, new { @class = "btn btn-primary", @style = "float:right;" })
-    <button type="submit" title="Wyszukaj urządzenia" class="btn btn-primary" style="float:right;">Wyszukaj urządzenia <span class="glyphicon glyphicon-search"></span></button>
-    <div style="overflow:hidden;">
+<div class="row" style="margin-top:20px;margin-bottom:20px;margin-left:0px;margin-right:0px;">
+    <div style="float:left;">
         <h2 style="margin:0px;">Zdefinowane urządzenia z&nbspagentami</h2>
     </div>
+        <div style="float:right;">
+            @Html.ActionLink("Skanuj urządzenia", "Method", "Controller", null, new { @class = "btn btn-primary", @style = "float:right;margin-left:5px;" })
+            <button type="submit" title="Wyszukaj urządzenia" class="btn btn-primary" style="float:right;">Wyszukaj urządzenia <span class="glyphicon glyphicon-search"></span></button>
+        </div>
 </div>
 
 @using (Html.BeginForm("AddDevice", "Home", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
+<table id="DeviceTable" class="table table-hover">
+    <tr>
+        <td></td>
+        <td>@Html.Editor("LPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "lp.", style = "max-width:50px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td>@Html.Editor("MACFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres MAC", style = "max-width:160px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td>@Html.Editor("ManufacturerFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Producent", style = "max-width:150px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td>@Html.Editor("IPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres IP", style = "max-width:140px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td>@Html.Editor("DescriptionFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Opis", style = "max-width:200px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th>
+        </th>
+        <th>
+            lp.
+        </th>
+        <th>
+            Adres MAC
+        </th>
+        <th>
+            Producent
+        </th>
+        <th>
+            Adres IP
+        </th>
+        <th>
+            Opis
+        </th>
+        <th>
+            Status
+        </th>
+        <th>
+        </th>
 
-    <table id="DeviceTable" class="table table-hover">
+    </tr>
+
+    @{
+        int counter = 1;
+
         <tr>
+            <td align="center">
+                @Html.CheckBox("Dev" + counter.ToString(), false, new { disabled = "disabled" })
+            </td>
             <td></td>
-            <td>@Html.Editor("LPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "lp.", style = "max-width:50px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-            <td>@Html.Editor("MACFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "MAC address", style = "max-width:160px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-            <td>@Html.Editor("ManufacturerFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Manufacturer", style = "max-width:150px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-            <td>@Html.Editor("IPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "IP address", style = "max-width:140px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-            <td>@Html.Editor("DescriptionFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Description", style = "max-width:200px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-            <td></td>
-            <td></td>
+            <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres MAC", style = "max-width:160px;", @required = "" } })</td>
+            <td>@Html.Editor("Manufacturer", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Producent", style = "max-width:150px;", @required = "" } })</td>
+            <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres IP", style = "max-width:140px;", @required = "" } })</td>
+            <td>@Html.Editor("Description", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Opis", style = "max-width:200px;" } })</td>
+            <td colspan="2">
+                <button type="submit" title="Dodaj nowe urządzenie" class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px" ;">Dodaj urządzenie&nbsp<span class="glyphicon glyphicon-plus"></span></button>
+            </td>
         </tr>
-        <tr>
-            <th>
-            </th>
-            <th>
-                lp.
-            </th>
-            <th>
-                MAC address
-            </th>
-            <th>
-                Manufacturer
-            </th>
-            <th>
-                IP address
-            </th>
-            <th>
-                Description
-            </th>
-            <th>
-                Status
-            </th>
-            <th>
-            </th>
 
-        </tr>
-        @{
-            int counter = 1;
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td align="center">
-                        @Html.CheckBox("Dev" + counter.ToString())
-                    </td>
-                    <td>
-                        @counter@{counter++;}
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.MACAddress)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Manufacturer)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.IPAddress)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-                    <td>
-                        @if(item.IsActive==1)
-                        {
-                            @Html.ActionLink("Aktywny", "ChangeActive", new {item.DeviceID }, new { @class = "btn btn-success", @style = "margin-top: 3px; margin-bottom: 3px" })
-                        }
-                        else
-                        {
-                            @Html.ActionLink("Nieaktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
-                        }
-                    </td>
-                    <td>
-                        @Html.ActionLink("Edytuj", "Edit", new { item.DeviceID }, new { @class = "btn btn-primary", @style = "margin-top: 3px; margin-bottom: 7px" })
-                    </td>
-                </tr>
-            }
-
+        foreach (var item in Model)
+        {
             <tr>
-                <td align="center">
-                    @Html.CheckBox("Dev" + counter.ToString(), false, new { disabled = "disabled" })
+                <td align="center">@Html.CheckBox("Dev" + counter.ToString())</td>
+                <td>@counter@{counter++;}</td>
+                <td>@Html.DisplayFor(modelItem => item.MACAddress)</td>
+                <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
+                <td>@Html.DisplayFor(modelItem => item.IPAddress)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>
+                    @if (item.IsActive == 1)
+                    {
+                        @Html.ActionLink("Aktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-success", @style = "margin-top: 3px; margin-bottom: 3px" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Nieaktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
+                    }
                 </td>
-                <td></td>
-                <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "MAC address", style = "max-width:160px;", @required = "" } })</td>
-                <td>@Html.Editor("Manufacturer", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Manufacturer", style = "max-width:150px;", @required = "" } })</td>
-                <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "IP address", style = "max-width:140px;", @required = "" } })</td>
-                <td>@Html.Editor("Description", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Description", style = "max-width:200px;" } })</td>
-                <td colspan="2">
-                    <button type="submit" title="Dodaj nowe urządzenie" class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px" ;">Dodaj urządzenie&nbsp<span class="glyphicon glyphicon-plus"></span></button>
+                <td>
+                    @Html.ActionLink("Edytuj", "Edit", new { item.DeviceID }, new { @class = "btn btn-primary", @style = "margin-top: 3px; margin-bottom: 7px" })
                 </td>
             </tr>
         }
-    </table>
+    }
+</table>
 
 
 }
@@ -117,22 +108,23 @@
             var length = table.children[0].children.length
 
             var LPFilter = document.getElementById("LPFilter").value;
-            var MACFilter = document.getElementById("MACFilter").value;
-            var ManufacturerFilter = document.getElementById("ManufacturerFilter").value;
-            var IPFilter = document.getElementById("IPFilter").value;
-            var DescriptionFilter = document.getElementById("DescriptionFilter").value;
+            var MACFilter = document.getElementById("MACFilter").value.toUpperCase();
+            var ManufacturerFilter = document.getElementById("ManufacturerFilter").value.toUpperCase();
+            var IPFilter = document.getElementById("IPFilter").value.toUpperCase();
+            var DescriptionFilter = document.getElementById("DescriptionFilter").value.toUpperCase();
 
             var index;
             var row;
 
-            for (index = 2; index < length - 1; index++) {
+            for (index = 3; index < length; index++) {
                 row = table.children[0].rows[index];
 
                 if (row.cells[1].textContent.startsWith(LPFilter) &&
-                    row.cells[2].textContent.startsWith(MACFilter) &&
-                    row.cells[3].textContent.startsWith(ManufacturerFilter) &&
-                    row.cells[4].textContent.startsWith(IPFilter) &&
-                    row.cells[5].textContent.startsWith(DescriptionFilter)) {
+                    row.cells[2].textContent.toUpperCase().startsWith(MACFilter) &&
+                    row.cells[3].textContent.toUpperCase().startsWith(ManufacturerFilter) &&
+                    row.cells[4].textContent.toUpperCase().startsWith(IPFilter) &&
+                    row.cells[5].textContent.toUpperCase().startsWith(DescriptionFilter))
+                {
                     row.style.display = "";
                 }
                 else {
