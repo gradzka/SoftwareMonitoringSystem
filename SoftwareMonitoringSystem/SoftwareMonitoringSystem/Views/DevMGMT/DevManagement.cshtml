@@ -13,7 +13,7 @@
         </div>
 </div>
 
-@using (Html.BeginForm("AddDevice", "Home", FormMethod.Post))
+@using (Html.BeginForm("AddDevice", "Home", FormMethod.Post, new { @id = "NewDeviceForm", }))
 {
     @Html.AntiForgeryToken()
 
@@ -132,6 +132,39 @@
                 }
             }
         }
+
+        //https://stackoverflow.com/a/32555021
+        $(function () {
+            $("#NewDeviceForm").on('submit', function (e) {
+                e.preventDefault() // prevent the form's normal submission
+                var dataToPost = $(this).serialize()
+
+                $.post("AddDevice", dataToPost)
+                    .done(function (response, status, jqxhr) {
+                        console.log(response);
+                        if (response = "Success") {
+                            AddDevice();
+                        }
+                       
+                    })
+                    .fail(function (jqxhr, status, error) {
+                        console.log("ERROR");
+                    })
+            })
+        })
+
+        function AddDevice() {
+            //Do skończenia
+            var table = document.getElementById("DeviceTable");
+            if (table != 0) {
+                var rowsNo = table.rows.length; //No of rows in the table
+                var newRow = table.rows[rowsNo-1].cloneNode(true); //copy first row of the table
+                
+                table.insertRow(table.rows.length);
+                table.rows[table.rows.length-1].innerHTML = newRow.innerHTML;
+            }
+        }
+
     </script>
 
 }
