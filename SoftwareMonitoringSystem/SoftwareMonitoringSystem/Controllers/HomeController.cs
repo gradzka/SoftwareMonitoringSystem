@@ -23,7 +23,6 @@ namespace SoftwareMonitoringSystem.Controllers
         {
             if (Request.IsAuthenticated)
             {
-                FormsAuthentication.SignOut();
                 return RedirectToAction("GetDevices", "DevMGMT");
             }
             return View();
@@ -53,6 +52,12 @@ namespace SoftwareMonitoringSystem.Controllers
                     return RedirectToAction("GetDevices", "DevMGMT");
                 }
             }
+            return RedirectToAction("Index", "Home");
+        }
+        [HttpPost, Authorize]
+        public ActionResult LogOut()
+        {
+            FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Home");
         }
     }
