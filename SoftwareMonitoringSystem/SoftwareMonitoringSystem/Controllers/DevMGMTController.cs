@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -16,13 +17,6 @@ namespace SoftwareMonitoringSystem.Controllers
             List<Device> devices = null;
             using (var dbContext = new SMSDBContext())
             {
-                Device device = new Device();
-                device.MACAddress = "11-a2-12-a3-12-a2";
-                device.Manufacturer = "Acer";
-                device.IPAddress = "192.168.9.53";
-                device.Description = "Work device";
-                dbContext.Devices.Add(device);
-                dbContext.SaveChanges();
                 devices = dbContext.Devices.ToList();
             }
             //lista urzadzen
@@ -35,25 +29,57 @@ namespace SoftwareMonitoringSystem.Controllers
             return View();
         }
 
-        // GET: DevMGMT/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
 
         // POST: DevMGMT/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public JsonResult AddDevice(string MACAddress, string Manufacturer, string IPAddress, string Description)
         {
             try
-            {
-                // TODO: Add insert logic here
+            {             
+                if (Manufacturer == "")
+                {
+                    return Json("Manufacturer is empty");
+                }
+                using (var dbContext = new SMSDBContext())
+                {                 
+                    Regex MACAddr = new Regex(@"^[a-fA-F0-9-]{17}|[a-fA-F0-9:]{17}$");
+                    if (MACAddr.IsMatch(MACAddress))
+                    {
+                        if (dbContext.Devices.Count(x=>x.MACAddress.Equals(MACAddress)) >0)
+                        {
+                            return Json("Occupied MAC address");
+                        }
+                    }
+                    else
+                    {
+                        return Json("Inproper MAC address");
+                    }
+                    Regex IPv4Addr = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]{1,5})?$");
+                    if (IPv4Addr.IsMatch(IPAddress))
+                    {
+                        if (dbContext.Devices.Count(x => x.IPAddress.Equals(IPAddress)) > 0)
+                        {
+                            return Json("Occupied IP address");
+                        }
+                    }
+                    else
+                    {
+                        return Json("Inproper IP address");
+                    }
 
-                return RedirectToAction("Index");
+                    Device device = new Device();
+                    device.MACAddress = MACAddress;
+                    device.Manufacturer = Manufacturer;
+                    device.IPAddress = IPAddress;
+                    device.Description = Description;
+                    dbContext.Devices.Add(device);
+                    dbContext.SaveChanges();
+                    return Json("Success");
+                }
             }
             catch
             {
-                return View();
+                return Json("Error");
             }
         }
 
