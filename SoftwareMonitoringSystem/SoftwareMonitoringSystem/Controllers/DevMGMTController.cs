@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -75,8 +74,7 @@ namespace SoftwareMonitoringSystem.Controllers
                     device.Description = Description;
                     dbContext.Devices.Add(device);
                     dbContext.SaveChanges();
-                    string deviceJson = JsonConvert.SerializeObject(device);
-                    return Json("Success");
+                    return Json(device);
                 }
             }
             catch
