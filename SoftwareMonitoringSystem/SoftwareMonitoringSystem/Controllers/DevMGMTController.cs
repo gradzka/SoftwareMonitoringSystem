@@ -18,6 +18,7 @@ namespace SoftwareMonitoringSystem.Controllers
             using (var dbContext = new SMSDBContext())
             {
                 devices = dbContext.Devices.ToList();
+                devices.Reverse();
             }
             //lista urzadzen
             return View("DevManagement", devices);
@@ -105,25 +106,30 @@ namespace SoftwareMonitoringSystem.Controllers
             }
         }
 
-        // GET: DevMGMT/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
         // POST: DevMGMT/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        public ActionResult Delete(List<int> IDs)
         {
             try
             {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
+                using (var dbContext = new SMSDBContext())
+                {
+                    Device device;
+                    foreach (var item in IDs)
+                    {
+                        device = dbContext.Devices.SingleOrDefault(dev => dev.DeviceID == item);
+                        if (device != null)
+                        {
+                            dbContext.Devices.Remove(device);
+                        }
+                    }
+                    dbContext.SaveChanges();
+                    return Json("Success");
+                }
             }
             catch
             {
-                return View();
+                return Json("Error");
             }
         }
     }
