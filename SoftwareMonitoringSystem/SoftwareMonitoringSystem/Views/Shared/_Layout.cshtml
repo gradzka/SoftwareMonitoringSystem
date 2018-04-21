@@ -24,6 +24,10 @@
             @if(Request.IsAuthenticated)
             {
                 <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li>@Html.ActionLink("Zmiana hasła", "ChangePass", "Home", null, new { @style = "margin-top:3px;" })</li>
+                        <li>@Html.ActionLink("Historia skanowań", "ScanHistory", "DevMGMT", null, new { @style = "margin-top:3px;" })</li>
+                    </ul>
                     @using (Html.BeginForm("LogOut", "Home", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
                     {
                         @Html.AntiForgeryToken()

@@ -212,6 +212,12 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\DevMGMT\DevManagement.cshtml" />
+    <Content Include="Views\DevMGMT\Edit.cshtml" />
+    <Content Include="Views\Home\ChangePass.cshtml" />
+    <Content Include="Views\DevMGMT\ScanHistory.cshtml" />
+    <Content Include="Views\DevMGMT\DevHistory.cshtml" />
+    <Content Include="Views\DevMGMT\DevScanDetails.cshtml" />
+    <Content Include="Views\Home\FactoryReset.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

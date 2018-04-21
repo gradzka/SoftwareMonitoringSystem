@@ -42,7 +42,13 @@
     
 
     <tr style="background-color:#f9fbe7">
-        <td>@Html.ActionLink("Skanuj", "Method", "Controller", null, new { @class = "btn btn-primary", @style = "float:center;", @title = "Skanuj zaznaczone urządzenia" })</td>
+        @using (Html.BeginForm("Scan", "Home", FormMethod.Post, new { @id = "ScanDeviceForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <td>
+                <button type="submit" title="Skanuj zaznaczone urządzenia" class="btn btn-primary" style="margin-top: 3px; margin-bottom: 3px" ;">Skanuj</button>
+            </td>
+        }
         <td></td>
         @using (Html.BeginForm("AddDevice", "Home", FormMethod.Post, new { @id = "NewDeviceForm" }))
         {
@@ -81,7 +87,7 @@
                 <tr>
                     <td align="center">@Html.CheckBox("LDev", false)</td>
                     <td>@Html.DisplayFor(modelItem => item.DeviceID)</td>
-                    <td>@Html.ActionLink(item.MACAddress, "Details", new { id = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź" })</td>
+                    <td>@Html.ActionLink(item.MACAddress, "DevHistory", new { id = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do historii skanowań urządzenia" })</td>
                     <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
                     <td>@Html.DisplayFor(modelItem => item.IPAddress)</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
@@ -200,6 +206,43 @@
                         console.log("ERROR");
                     })
             })
+
+            $("#ScanDeviceForm").on('submit', function (e) {
+                e.preventDefault()
+
+                var IDs = [];
+                var rowsToScan = [];
+
+                var table = document.getElementById("DeviceTable");
+                var length = table.children[0].children.length
+                var index;
+                var row;
+
+                for (index = 3; index < length; index++) {
+                    row = table.children[0].rows[index];
+
+                    if (row.cells[0].children[0].checked) {
+                        IDs.push(parseInt(row.cells[1].textContent));
+                        rowsToScan.push(row);
+                    }
+                }
+
+                $.post("Scan", { IDs: IDs })
+                    .done(function (response, status, jqxhr) {
+                        if (response == "Success") {
+                            for (var i = rowsToScan.length - 1; i >= 0; i--) {
+                                rowsToScan[i].cells[0].children[0].checked = false;
+                            }
+                        }
+                        else {
+                            console.log(response);
+                        }
+
+                    })
+                    .fail(function (jqxhr, status, error) {
+                        console.log("ERROR");
+                    })
+            })
         })
 
         function AddDevice(response) {
@@ -214,7 +257,7 @@
                 row.cells[0].innerHTML = "<input id=\"LDev\" name=\"LDev\" value=\"true\" type=\"checkbox\"><input name=\"LDev\" value=\"false\" type=\"hidden\">";
                 row.cells[0].align = "center";
                 row.cells[1].innerHTML = response.DeviceID;
-                row.cells[2].innerHTML = "<a href=\"/DevMGMT/Details/" + response.DeviceID + "\" style=\"color:#0d47a1;\" title=\"Przejdź\">" + response.MACAddress + "</a>";
+                row.cells[2].innerHTML = "<a href=\"/DevMGMT/DevHistory/" + response.DeviceID + "\" style=\"color:#0d47a1;\" title=\"Przejdź do historii skanowań urządzenia\">" + response.MACAddress + "</a>";
                 row.cells[3].innerHTML = response.Manufacturer;
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
