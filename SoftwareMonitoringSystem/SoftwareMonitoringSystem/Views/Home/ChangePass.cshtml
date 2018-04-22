@@ -15,21 +15,22 @@
         <div class="form-group">
             @Html.Label("Podaj aktualne hasło", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.Editor("", null, "actualP", new { htmlAttributes = new { @class = "form-control", @value = "", @name = "actualP", @placeholder = "Aktualne hasło", @required = "" } })
+
+                @Html.Editor("actualP", null, "actualP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Aktualne hasło", @required = "" } })
             </div>
         </div>
 
         <div class="form-group">
             @Html.Label("Podaj nowe hasło", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.Editor("", null, "newP", new { htmlAttributes = new { @class = "form-control", @value = "", @name = "newP", @placeholder = "Nowe hasło", @required = "" } })
+                @Html.Editor("newP", null, "newP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Nowe hasło", @required = "" } })
             </div>
         </div>
 
         <div class="form-group">
             @Html.Label("Potwierdź nowe hasło", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.Editor("", null, "confirmNewP", new { htmlAttributes = new { @class = "form-control", @value = "", @name = "confirmNewP", @placeholder = "Potwierdź nowe hasło", @required = "" } })
+                @Html.Editor("confirmNewP", null, "confirmNewP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Potwierdź nowe hasło", @required = "" } })
             </div>
         </div>
 
