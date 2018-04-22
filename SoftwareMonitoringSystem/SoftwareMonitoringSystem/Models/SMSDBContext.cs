@@ -120,6 +120,6 @@ namespace SoftwareMonitoringSystem
         [Required, Range(0, 3)]
         public int LogInAttemptCounter { get; set; }
         public Nullable<DateTime> LastLogInAttemptDate { get; set; }
-        public Nullable<DateTime> LastEditDate { get; set; }
+        public DateTime LastEditDate { get; set; }
     }
 }

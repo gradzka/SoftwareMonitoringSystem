@@ -9,6 +9,8 @@ using System.Web.Mvc;
 using SoftwareMonitoringSystem.Infrastructure.Abstract;
 using SoftwareMonitoringSystem.Infrastructure.Concrete;
 using System.Web.Security;
+using System.Text.RegularExpressions;
+using System.Data.Entity;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
@@ -60,5 +62,69 @@ namespace SoftwareMonitoringSystem.Controllers
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpGet, Authorize]
+        public ActionResult ChangePass()
+        {
+            return View();
+        }
+        [HttpPost, Authorize]
+        public ActionResult ChangePass(String actualP, String newP, String confirmNewP)
+        {
+            using (var dbContext = new SMSDBContext())
+            {
+                Admin admin = dbContext.Admins.FirstOrDefault();
+                if (admin != null)
+                {
+                    using (var sha512 = SHA512.Create())
+                    {
+                        DateTime editDate = dbContext.Admins.Select(x => x.LastEditDate).FirstOrDefault();
+                        string aPAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(actualP))).Replace("-", string.Empty);//512 bit hash password
+                        string aPAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(aPAbbrev + editDate))).Replace("-", string.Empty);
+                        if (admin.Password.Equals(aPAbbrevDate)) //actualP is proper
+                        {
+                            if (newP.Equals(confirmNewP)) // if newP == confirmP
+                            {
+                                Regex regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$");
+                                /* 8 signs
+                                 * 1 upperCase
+                                 * 1 lowerCase
+                                 * 1 digit
+                                 */
+                                Match match = regex.Match(newP);
+                                if (match.Success)
+                                {
+                                        DateTime now = DateTime.Now;
+                                        admin.LastEditDate = now;
+                                        string newPAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newP))).Replace("-", string.Empty);//512 bit hash password
+                                        string newPAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newPAbbrev + now))).Replace("-", string.Empty);//512 bit hash password
+                                        admin.Password = newPAbbrevDate;
+                                        dbContext.Entry(admin).State = EntityState.Modified;
+                                        dbContext.SaveChanges();
+                                        return Json("Success");
+                                }
+                                else
+                                {
+                                    return Json("Passwords don't meet the requirements");
+                                }
+                            }
+                            else
+                            {
+                                return Json("Please type proper passwords");
+                            }
+                        }
+                        else
+                        {
+                            return Json("Please type proper passwords");
+                        }
+                    }
+                }
+                else
+                {
+                    return Json("Please try once more because of internal error");
+                }
+            }
+        }
+
     }
 }

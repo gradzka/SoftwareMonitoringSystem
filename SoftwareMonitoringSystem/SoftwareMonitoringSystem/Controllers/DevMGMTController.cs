@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -84,25 +85,43 @@ namespace SoftwareMonitoringSystem.Controllers
             }
         }
 
-        // GET: DevMGMT/Edit/5
-        public ActionResult Edit(int id)
+        [HttpGet]
+        public ActionResult Edit(int DeviceID)
         {
-            return View();
+            using (var dbContext = new SMSDBContext())
+            {
+                Device device = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(DeviceID));
+                if (device != null)
+                {
+                    return View(device);
+                }
+                else
+                {
+                    return RedirectToAction("GetDevices", "DevMGMT");
+                }
+            }
         }
 
-        // POST: DevMGMT/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Device device)
         {
-            try
+            if (device != null)
             {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
+                using (var dbContext = new SMSDBContext())
+                {
+                    Device dev = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(device.DeviceID));
+                    dev.MACAddress = device.MACAddress;
+                    dev.Manufacturer = device.Manufacturer;
+                    dev.IPAddress = device.IPAddress;
+                    dev.Description = device.Description;
+                    dbContext.Entry(dev).State = EntityState.Modified;
+                    dbContext.SaveChanges();
+                    return Json("Device with ID: " + device.DeviceID + " has been modified");
+                }
             }
-            catch
+            else
             {
-                return View();
+                return Json("Error");
             }
         }
 
@@ -132,5 +151,18 @@ namespace SoftwareMonitoringSystem.Controllers
                 return Json("Error");
             }
         }
+        [HttpGet]
+        public ActionResult ScanHistory()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Scan(List<int> IDs)
+        {
+            //TODO
+            return Json("Success");
+        }
+
     }
 }

@@ -42,7 +42,7 @@
     
 
     <tr style="background-color:#f9fbe7">
-        @using (Html.BeginForm("Scan", "Home", FormMethod.Post, new { @id = "ScanDeviceForm" }))
+        @using (Html.BeginForm("Scan", "DevMGMT", FormMethod.Post, new { @id = "ScanDeviceForm" }))
         {
             @Html.AntiForgeryToken()
             <td>
@@ -50,7 +50,7 @@
             </td>
         }
         <td></td>
-        @using (Html.BeginForm("AddDevice", "Home", FormMethod.Post, new { @id = "NewDeviceForm" }))
+        @using (Html.BeginForm("AddDevice", "DevMGMT", FormMethod.Post, new { @id = "NewDeviceForm" }))
         {
             @Html.AntiForgeryToken()
             <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres MAC", style = "max-width:160px;", @required = "" } })</td>
@@ -61,7 +61,7 @@
                 <button type="submit" title="Dodaj nowe urządzenie" class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px" ;">Dodaj</button>
             </td>
         }
-        @using (Html.BeginForm("Delete", "Home", FormMethod.Post, new { @id = "DelDeviceForm" }))
+        @using (Html.BeginForm("Delete", "DevMGMT", FormMethod.Post, new { @id = "DelDeviceForm" }))
         {
             @Html.AntiForgeryToken()
             <td>
