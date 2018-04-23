@@ -85,38 +85,21 @@ namespace SoftwareMonitoringSystem.Controllers
             }
         }
 
-        [HttpGet]
-        public ActionResult Edit(int DeviceID)
-        {
-            using (var dbContext = new SMSDBContext())
-            {
-                Device device = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(DeviceID));
-                if (device != null)
-                {
-                    return View(device);
-                }
-                else
-                {
-                    return RedirectToAction("GetDevices", "DevMGMT");
-                }
-            }
-        }
-
         [HttpPost]
-        public ActionResult Edit(Device device)
+        public ActionResult Edit(int DeviceID, string MACAddress, string Manufacturer, string IPAddress, string Description)
         {
-            if (device != null)
+            if (DeviceID<0 && MACAddress !="" && Manufacturer!="" && IPAddress != "" && Description != "")
             {
                 using (var dbContext = new SMSDBContext())
                 {
-                    Device dev = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(device.DeviceID));
-                    dev.MACAddress = device.MACAddress;
-                    dev.Manufacturer = device.Manufacturer;
-                    dev.IPAddress = device.IPAddress;
-                    dev.Description = device.Description;
+                    Device dev = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(DeviceID));
+                    dev.MACAddress = MACAddress;
+                    dev.Manufacturer = Manufacturer;
+                    dev.IPAddress = IPAddress;
+                    dev.Description = Description;
                     dbContext.Entry(dev).State = EntityState.Modified;
                     dbContext.SaveChanges();
-                    return Json("Device with ID: " + device.DeviceID + " has been modified");
+                    return Json("Device with ID: " + DeviceID + " has been modified");
                 }
             }
             else
