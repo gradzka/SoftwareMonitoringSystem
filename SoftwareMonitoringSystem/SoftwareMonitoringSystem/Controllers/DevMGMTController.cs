@@ -40,7 +40,7 @@ namespace SoftwareMonitoringSystem.Controllers
             {             
                 if (Manufacturer == "")
                 {
-                    return Json("Manufacturer is empty");
+                    return Json("Uzupełnij pole Producent");
                 }
                 using (var dbContext = new SMSDBContext())
                 {                 
@@ -49,24 +49,24 @@ namespace SoftwareMonitoringSystem.Controllers
                     {
                         if (dbContext.Devices.Count(x=>x.MACAddress.Equals(MACAddress)) >0)
                         {
-                            return Json("Occupied MAC address");
+                            return Json("Wpisz inny adres MAC (podany jest zajęty)");
                         }
                     }
                     else
                     {
-                        return Json("Inproper MAC address");
+                        return Json("Wpisz poprawny adres MAC");
                     }
                     Regex IPv4Addr = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]{1,5})?$");
                     if (IPv4Addr.IsMatch(IPAddress))
                     {
                         if (dbContext.Devices.Count(x => x.IPAddress.Equals(IPAddress)) > 0)
                         {
-                            return Json("Occupied IP address");
+                            return Json("Wpisz inny adres IP (podany jest zajęty)");
                         }
                     }
                     else
                     {
-                        return Json("Inproper IP address");
+                        return Json("Wpisz poprawny adres IP");
                     }
 
                     Device device = new Device();
@@ -81,7 +81,7 @@ namespace SoftwareMonitoringSystem.Controllers
             }
             catch
             {
-                return Json("Error");
+                return Json("Spróbuj ponownie (błąd wewnętrzny aplikacji)");
             }
         }
 
@@ -99,12 +99,12 @@ namespace SoftwareMonitoringSystem.Controllers
                     dev.Description = Description;
                     dbContext.Entry(dev).State = EntityState.Modified;
                     dbContext.SaveChanges();
-                    return Json("Device with ID: " + DeviceID + " has been modified");
+                    return Json("Urządzenie o ID: " + DeviceID + " zostało zmodyfikowane");
                 }
             }
             else
             {
-                return Json("Error");
+                return Json("Spróbuj ponownie (błąd wewnętrzny aplikacji)");
             }
         }
 

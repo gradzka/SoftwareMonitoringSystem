@@ -135,23 +135,23 @@ namespace SoftwareMonitoringSystem.Controllers
                                 }
                                 else
                                 {
-                                    return Json("Passwords don't meet the requirements");
+                                    return Json("Wprowadź hasło spełniające kryteria: 8 znaków, 1 wielka litera, 1 mała litera, 1 cyfra");
                                 }
                             }
                             else
                             {
-                                return Json("Please type proper passwords");
+                                return Json("Wprowadź poprawne hasła");
                             }
                         }
                         else
                         {
-                            return Json("Please type proper passwords");
+                            return Json("Wprowadź poprawne hasła");
                         }
                     }
                 }
                 else
                 {
-                    return Json("Please try once more because of internal error");
+                    return Json("Spróbuj ponownie (błąd wewnętrzny aplikacji)");
                 }
             }
         }
