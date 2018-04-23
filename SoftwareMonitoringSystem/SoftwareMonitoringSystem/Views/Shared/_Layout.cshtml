@@ -21,11 +21,11 @@
                     <span class="glyphicon glyphicon-home" aria-hidden="true"></span> SSO
                 </a>
             </div>
-            @if(Request.IsAuthenticated)
+            @if (Request.IsAuthenticated)
             {
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li>@Html.ActionLink("Zmiana hasła", "ChangePass", "Home", null, new { @style = "margin-top:3px;" })</li>
+                        <li><a href="#changePassModal" role="button" class="btn" style="margin-top: 2px" data-toggle="modal" data-backdrop="static" onclick="editClick(this)">Zmiana hasła</a></li>
                         <li>@Html.ActionLink("Historia skanowań", "ScanHistory", "DevMGMT", null, new { @style = "margin-top:3px;" })</li>
                     </ul>
                     @using (Html.BeginForm("LogOut", "Home", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
@@ -45,13 +45,83 @@
         @RenderBody()
         <div class="footer">
             <strong>Sieciowy skaner oprogramowania</strong>
-            <br /> 
+            <br />
             @DateTime.Now.Year
         </div>
     </div>
 
+    @if (Request.IsAuthenticated)
+    {
+        <div id="changePassModal" class="modal fade">
+            <div class="modal-dialog" style="width:510px">
+                <div class="modal-content">
+                    @using (Html.BeginForm("ChangePass", "Home", FormMethod.Post, new { @id = "ChangePassForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Zmiana hasła</h4>
+                        </div>
+                        <div class="modal-body">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <div class="form-group">
+                                @Html.Label("Podaj aktualne hasło", htmlAttributes: new { @class = "control-label col-md-5", @style = "margin-top:7px; margin-bottom:7px;" })
+                                <div class="col-md-7">
+                                    @Html.Editor("actualP", null, "actualP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Aktualne hasło", @required = "" } })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Podaj nowe hasło", htmlAttributes: new { @class = "control-label col-md-5", @style = "margin-top:7px; margin-bottom:7px;" })
+                                <div class="col-md-7">
+                                    @Html.Editor("newP", null, "newP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Nowe hasło", @required = "" } })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.Label("Potwierdź nowe hasło", htmlAttributes: new { @class = "control-label col-md-5", @style = "margin-top:7px; margin-bottom:7px;" })
+                                <div class="col-md-7">
+                                    @Html.Editor("confirmNewP", null, "confirmNewP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Potwierdź nowe hasło", @required = "" } })
+                                </div>
+                            </div>
+                            <br /><br /><br /><br />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" style="width:80px;">Anuluj</button>
+                            <input type="submit" value="Zmień" class="btn btn-primary" style="width:80px" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+    @if (Request.IsAuthenticated)
+    {
+        <script type="text/javascript">
+            $(function () {
+                $("#ChangePassForm").on('submit', function (e) {
+                e.preventDefault() // prevent the form's normal submission
+                var dataToPost = $(this).serialize()
+
+                $.post('@Url.Action("ChangePass", "Home")', dataToPost)
+                    .done(function (response, status, jqxhr) {
+                        if (response == "Success") {
+                            console.log(response);
+                        }
+                        else {
+                            console.log(response);
+                        }
+                    })
+                    .fail(function (jqxhr, status, error) {
+                        console.log("ERROR");
+                    })
+            })
+            })
+        </script>
+    }
+
 </body>
 </html>
