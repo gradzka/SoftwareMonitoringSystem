@@ -25,10 +25,31 @@ namespace SoftwareMonitoringSystem.Controllers
         {
             if (Request.IsAuthenticated)
             {
+                //Check password
+                using (var dbContext = new SMSDBContext())
+                {
+                    SHA512 sha512 = SHA512.Create();
+                    Admin admin = dbContext.Admins.SingleOrDefault();
+                    if (admin != null)
+                    {
+                        //static password
+                        string staticPassword = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + admin.LastEditDate))).Replace("-", string.Empty);//512 bit hash password
+                        if (staticPassword.Equals(admin.Password))
+                        {
+                            ViewBag.ChangePassword = true;
+                        }
+                        else
+                        {
+                            ViewBag.ChangePassword = false;
+                        }
+                    }                   
+                }
+                
                 return RedirectToAction("GetDevices", "DevMGMT");
             }
             return View();
         }
+        
 
         public ActionResult About()
         {
@@ -51,7 +72,7 @@ namespace SoftwareMonitoringSystem.Controllers
             {
                 if (authProvider.Authenticate(loginData))
                 {
-                    return RedirectToAction("GetDevices", "DevMGMT");
+                    return RedirectToAction("Index", "Home");
                 }
             }
             return RedirectToAction("Index", "Home");
