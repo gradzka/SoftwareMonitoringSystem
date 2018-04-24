@@ -12,6 +12,9 @@
     </div>
 </div>
 
+<div id="alertErrorDevice" class="alert alert-danger" style="display:none">
+    Error
+</div>
 
 <table id="DeviceTable" class="table">
     <tr>
@@ -50,9 +53,9 @@
         @using (Html.BeginForm("AddDevice", "DevMGMT", FormMethod.Post, new { @id = "NewDeviceForm" }))
         {
             @Html.AntiForgeryToken()
-            <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres MAC", style = "max-width:160px;", @required = "" } })</td>
+            <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "ff-ff-ff-ff-ff-ff", style = "max-width:160px;", @required = "" } })</td>
             <td>@Html.Editor("Manufacturer", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Producent", style = "max-width:150px;", @required = "" } })</td>
-            <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres IP", style = "max-width:140px;", @required = "" } })</td>
+            <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "192.168.0.1", style = "max-width:140px;", @required = "" } })</td>
             <td>@Html.Editor("Description", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Opis", style = "max-width:200px;" } })</td>
             <td colspan="2">
                 <button type="submit" title="Dodaj nowe urządzenie" class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px" ;">Dodaj</button>
@@ -91,10 +94,12 @@
             <td>
                 @if (item.IsActive == 1)
                 {
+                    <span class="btn btn-success" style = "margin-top: 3px; margin-bottom: 3px" >Aktywny</span>
                     @Html.ActionLink("Aktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-success", @style = "margin-top: 3px; margin-bottom: 3px" })
                 }
                 else
                 {
+                    <span class="btn btn-danger" style = "margin-top: 3px; margin-bottom: 3px" >Nieaktywny</span>
                     @Html.ActionLink("Nieaktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
                 }
             </td>
@@ -108,35 +113,40 @@
 </table>
 
 <div id="editModal" class="modal fade">
-    <div class="modal-dialog" style="width:400px">
+    <div class="modal-dialog" style="max-width:340px;">
         <div class="modal-content">
             @using (Html.BeginForm("Edit", "DevMGMT", FormMethod.Post, new { @id = "EditDeviceForm" }))
             {
                 @Html.AntiForgeryToken()
-            <div class="modal-header modal-header-blue">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Edycja urządzenia</h4>
-            </div>
-            <div class="modal-body form-horizontal">
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                @Html.Hidden("DeviceID")
-                <div class="form-group col-md-12">
-                    @Html.Editor("MACAddress", null, "MACAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres MAC", @required = "" } })
+                <div class="modal-header modal-header-blue">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edycja urządzenia</h4>
                 </div>
-                <div class="form-group col-md-12">
-                    @Html.Editor("Manufacturer", null, "Manufacturer", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Producent", @required = "" } })
+                <div class="modal-body form-horizontal">
+                    <div id="alertSuccessEditDevice" class="alert alert-success" style="display:none">
+                        <strong>Sukces!</strong> Dane zostały zmienione pomyślnie
+                    </div>
+                    <div id="alertErrorEditDevice" class="alert alert-danger" style="display:none">
+                        Error
+                    </div>
+                    @Html.Hidden("DeviceID")
+                    <div style="margin-bottom:5px;">
+                        @Html.Editor("MACAddress", null, "MACAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres MAC", @required = "" } })
+                    </div>
+                    <div style="margin-bottom:5px;">
+                        @Html.Editor("Manufacturer", null, "Manufacturer", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Producent", @required = "" } })
+                    </div>
+                    <div style="margin-bottom:5px;">
+                        @Html.Editor("IPAddress", null, "IPAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres IP", @required = "" } })
+                    </div>
+                    <div style="margin-bottom:5px;">
+                        @Html.Editor("Description", null, "Description", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Opis" } })
+                    </div>
                 </div>
-                <div class="form-group  col-md-12">
-                    @Html.Editor("IPAddress", null, "IPAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres IP", @required = "" } })
+                <div class="modal-footer" style="margin-top:0px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="width:80px;">Anuluj</button>
+                    <input type="submit" value="Zmień" class="btn btn-primary" style="width:80px" />
                 </div>
-                <div class="form-group col-md-12">
-                    @Html.Editor("Description", null, "Description", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Opis" } })
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" style="width:80px;">Anuluj</button>
-                <input type="submit" value="Zmień" class="btn btn-primary" style="width:80px" />
-            </div>
             }
         </div>
     </div>
@@ -181,27 +191,29 @@
 
                 $.post("AddDevice", dataToPost)
                     .done(function (response, status, jqxhr) {
-                        if (response != "Error" && response != "Manufacturer is empty" && response != "Occupied MAC address" && response != "Inproper MAC address" && response != "Occupied IP address" && response != "Inproper IP address") {
+                        if (response != "Uzupełnij pole Producent" && response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz poprawny adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz poprawny adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
                             AddDevice(response);
                             var table = document.getElementById("DeviceTable");
                             table.rows[1].cells[2].children[0].value = "";
                             table.rows[1].cells[3].children[0].value = "";
                             table.rows[1].cells[4].children[0].value = "";
                             table.rows[1].cells[5].children[0].value = "";
+                            $("#alertErrorDevice").hide();
                         }
                         else {
-                            console.log(response);
+                            $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
+                            $("#alertErrorDevice").show();
                         }
 
                     })
                     .fail(function (jqxhr, status, error) {
-                        console.log("ERROR");
+                        $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                        $("#alertErrorDevice").show();
                     })
             })
 
             $("#DelDeviceForm").on('submit', function (e) {
                 e.preventDefault()
-                //var dataToPost = $(this).serialize()
 
                 var IDs = [];
                 var rowsToDelete = [];
@@ -226,14 +238,17 @@
                             for (var i = rowsToDelete.length - 1; i >= 0; i--) {
                                 table.deleteRow(rowsToDelete[i].rowIndex);
                             }
+                            $("#alertErrorDevice").hide();
                         }
                         else {
-                            console.log(response);
+                            $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
+                            $("#alertErrorDevice").show();
                         }
 
                     })
                     .fail(function (jqxhr, status, error) {
-                        console.log("ERROR");
+                        $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                        $("#alertErrorDevice").show();
                     })
             })
 
@@ -262,6 +277,7 @@
                         if (response == "Success") {
                             for (var i = rowsToScan.length - 1; i >= 0; i--) {
                                 rowsToScan[i].cells[0].children[0].checked = false;
+
                             }
                         }
                         else {
@@ -292,7 +308,7 @@
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
                 row.cells[6].innerHTML = "<a class=\"btn btn-danger\" href=\"/DevMGMT/ChangeActive?DeviceID=" + response.DeviceID + "\" style=\"margin-top: 3px; margin-bottom: 3px\">Nieaktywny</a> ";
-                row.cells[7].innerHTML = "<a class=\"btn btn-primary\" href=\"/DevMGMT/Edit?DeviceID=" + response.DeviceID + "\" style=\"margin-top: 3px; margin-bottom: 7px\">Edytuj</a>\n ";
+                row.cells[7].innerHTML = "<a href=\"#editModal\" role=\"button\" class=\"btn btn-primary\" style=\"margin-top: 3px; margin-bottom: 7px\" data-toggle=\"modal\" data-backdrop=\"static\" onclick=\"editClick(this)\">Edytuj</a>";
                 row.cells[8].innerHTML = "<input id=\"RDev\" name=\"RDev\" onchange=\"highlightRow(this)\" value=\"true\" type=\"checkbox\"><input name=\"RDev\" value=\"false\" type=\"hidden\">\n ";
                 row.cells[8].align = "center";
             }
@@ -329,13 +345,38 @@
         }
 
         function editClick(button) {
+            $("#alertSuccessEditDevice").hide();
+            $("#alertErrorEditDevice").hide();
             var row = button.parentNode.parentNode;
             var modalForm = document.getElementById("editModal").children[0].children[0].children[0].children[2];
-            modalForm.children[0].value = row.cells[1].textContent;
-            modalForm.children[1].children[0].value = row.cells[2].textContent;
-            modalForm.children[2].children[0].value = row.cells[3].textContent;
-            modalForm.children[3].children[0].value = row.cells[4].textContent;
-            modalForm.children[4].children[0].value = row.cells[5].textContent;
+            modalForm.children[2].value = row.cells[1].textContent;
+            modalForm.children[3].children[0].value = row.cells[2].textContent;
+            modalForm.children[4].children[0].value = row.cells[3].textContent;
+            modalForm.children[5].children[0].value = row.cells[4].textContent;
+            modalForm.children[6].children[0].value = row.cells[5].textContent;
         }
+
+        $("#EditDeviceForm").on('submit', function (e) {
+                e.preventDefault() // prevent the form's normal submission
+                var dataToPost = $(this).serialize()
+
+                $.post('@Url.Action("Edit", "Home")', dataToPost)
+                    .done(function (response, status, jqxhr) {
+                        if (response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz prawidłowy adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz prawidłowy adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
+                            $("#alertErrorEditDevice").hide();
+                            $("#alertSuccessEditDevice").show();
+                        }
+                        else {
+                            $("#alertErrorEditDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
+                            $("#alertErrorEditDevice").show();
+                            $("#alertSuccessEditDevice").hide();
+                        }
+                    })
+                    .fail(function (jqxhr, status, error) {
+                        $("#alertErrorEditDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                        $("#alertErrorEditDevice").show();
+                        $("#alertSuccessEditDevice").hide();
+                    })
+                })
     </script>
 }

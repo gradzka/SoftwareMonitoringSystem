@@ -25,7 +25,7 @@
             {
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="#changePassModal" role="button" class="btn" style="margin-top: 2px" data-toggle="modal" data-backdrop="static" onclick="editClick(this)">Zmiana hasła</a></li>
+                        <li><a href="#changePassModal" name="changePassBtn" role="button" class="btn" style="margin-top: 2px" data-toggle="modal" data-backdrop="static">Zmiana hasła</a></li>
                         <li>@Html.ActionLink("Historia skanowań", "ScanHistory", "DevMGMT", null, new { @style = "margin-top:3px;" })</li>
                     </ul>
                     @using (Html.BeginForm("LogOut", "Home", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
@@ -53,7 +53,7 @@
     @if (Request.IsAuthenticated)
     {
         <div id="changePassModal" class="modal fade">
-            <div class="modal-dialog" style="width:400px">
+            <div class="modal-dialog" style="max-width:340px">
                 <div class="modal-content">
                     @using (Html.BeginForm("ChangePass", "Home", FormMethod.Post, new { @id = "ChangePassForm" }))
                     {
@@ -63,17 +63,26 @@
                             <h4 class="modal-title">Zmiana hasła</h4>
                         </div>
                         <div class="modal-body form-horizontal">
-                            <div class="form-group col-md-12">
-                                @Html.Editor("actualP", null, "actualP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Aktualne hasło", @required = "" } })
+                            <div id="alertChangePass" class="alert alert-danger" style="display:none">
+                                <strong>Uwaga!</strong> Zmień domyślne hasło
                             </div>
-                            <div class="form-group col-md-12">
-                                @Html.Editor("newP", null, "newP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Nowe hasło", @required = "" } })
+                            <div id="alertSuccessChangePass" class="alert alert-success" style="display:none">
+                                <strong>Sukces!</strong> Hasło zostało zmienione pomyślnie
                             </div>
-                            <div class="form-group col-md-12">
-                                @Html.Editor("confirmNewP", null, "confirmNewP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Potwierdź nowe hasło", @required = "" } })
+                            <div id="alertErrorChangePass" class="alert alert-danger" style="display:none">
+                                Error
+                            </div>
+                            <div style="margin-bottom:5px;">
+                                @Html.Editor("actualP", null, "actualP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Aktualne hasło", @required = "", @type = "password" } })
+                            </div>
+                            <div style="margin-bottom:5px;">
+                                @Html.Editor("newP", null, "newP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Nowe hasło", @required = "", @type = "password" } })
+                            </div>
+                            <div style="margin-bottom:5px;">
+                                @Html.Editor("confirmNewP", null, "confirmNewP", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Potwierdź nowe hasło", @required = "", @type = "password" } })
                             </div>
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer" style="margin-top:0px;">
                             <button type="button" class="btn btn-default" data-dismiss="modal" style="width:80px;">Anuluj</button>
                             <input type="submit" value="Zmień" class="btn btn-primary" style="width:80px" />
                         </div>
@@ -91,6 +100,25 @@
     {
         <script type="text/javascript">
             $(function () {
+                var state = '@TempData["ChangePassword"]';
+                if (state == '') {
+                    $.post('@Url.Action("CheckDefaultPassword", "Home")')
+                        .done(function (response, status, jqxhr) {
+                            state = response;
+                        })
+                        .fail(function (jqxhr, status, error) {
+                            state = 'True';
+                        })
+                }
+                else {
+                    state = '@TempData["ChangePassword"]' == 'True';
+                }
+
+                if (state) {
+                    $("#alertChangePass").show();
+                    $("#changePassModal").modal();
+                }
+
                 $("#ChangePassForm").on('submit', function (e) {
                 e.preventDefault() // prevent the form's normal submission
                 var dataToPost = $(this).serialize()
@@ -98,16 +126,34 @@
                 $.post('@Url.Action("ChangePass", "Home")', dataToPost)
                     .done(function (response, status, jqxhr) {
                         if (response == "Success") {
-                            console.log(response);
+                            document.getElementById("actualP").value='';
+                            document.getElementById("newP").value = '';
+                            document.getElementById("confirmNewP").value = '';
+                            $("#alertChangePass").hide();
+                            $("#alertErrorChangePass").hide();
+                            $("#alertSuccessChangePass").show();
                         }
                         else {
-                            console.log(response);
+                            $("#alertErrorChangePass")[0].innerHTML = 'Uwaga! '.bold() + response;
+                            $("#alertErrorChangePass").show();
+                            $("#alertSuccessChangePass").hide();
                         }
                     })
                     .fail(function (jqxhr, status, error) {
-                        console.log("ERROR");
+                        $("#alertErrorChangePass")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                        $("#alertErrorChangePass").show();
+                        $("#alertSuccessChangePass").hide();
                     })
-            })
+                })
+
+                $("#changePassModal").on("hidden.bs.modal", function () {
+                    document.getElementById("actualP").value = '';
+                    document.getElementById("newP").value = '';
+                    document.getElementById("confirmNewP").value = '';
+                    $("#alertErrorChangePass").hide();
+                    $("#alertSuccessChangePass").hide();
+                })
+
             })
         </script>
     }
