@@ -30,7 +30,7 @@ namespace SoftwareMonitoringSystem.Controllers
             }
             return View();
         }
-        
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult LogIn(Login loginData)
         {
@@ -76,14 +76,14 @@ namespace SoftwareMonitoringSystem.Controllers
                                 Match match = regex.Match(newP);
                                 if (match.Success)
                                 {
-                                        DateTime now = DateTime.Now;
-                                        admin.LastEditDate = now;
-                                        string newPAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newP))).Replace("-", string.Empty);//512 bit hash password
-                                        string newPAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newPAbbrev + now))).Replace("-", string.Empty);//512 bit hash password
-                                        admin.Password = newPAbbrevDate;
-                                        dbContext.Entry(admin).State = EntityState.Modified;
-                                        dbContext.SaveChanges();
-                                        return Json("Success");
+                                    DateTime now = DateTime.Now;
+                                    admin.LastEditDate = now;
+                                    string newPAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newP))).Replace("-", string.Empty);//512 bit hash password
+                                    string newPAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(newPAbbrev + now))).Replace("-", string.Empty);//512 bit hash password
+                                    admin.Password = newPAbbrevDate;
+                                    dbContext.Entry(admin).State = EntityState.Modified;
+                                    dbContext.SaveChanges();
+                                    return Json("Success");
                                 }
                                 else
                                 {
@@ -107,6 +107,25 @@ namespace SoftwareMonitoringSystem.Controllers
                 }
             }
         }
-
+        public ActionResult FactoryReset()
+        {
+            List<int> blockedIndexes = new List<int>();
+            Random rand = new Random();
+            int index = -1;
+            for (int i = 0; i < 8; i++)
+            {
+                do
+                {
+                    index = rand.Next(1, 17);
+                } while (blockedIndexes.Contains(index));
+                blockedIndexes.Add(index);
+            }
+            return View(blockedIndexes);
+        }
+        [HttpPost]
+        public ActionResult FactoryReset(List<int> indexes)
+        {
+            return RedirectToAction("FactoryReset", "Home");
+        }
     }
 }
