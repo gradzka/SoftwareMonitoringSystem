@@ -1,7 +1,93 @@
-﻿
+﻿@model List<int>
+
 @{
-    ViewBag.Title = "FactoryReset";
+    ViewBag.Title = "Przywrócenie ustawień fabrycznych";
 }
 
-<h2>FactoryReset</h2>
+<h2>Przywrócenie ustawień fabrycznych</h2>
 
+<div class="alert alert-danger">
+    Uzupełnij wybrane pola hasła, aby wyczyścić wszystkie dane i przywrócić początkowe ustawienia logowania
+</div>
+
+
+@if (ViewData["Result"] != null)
+{
+    if (ViewData["Result"] == "Success")
+    {
+        <div class="alert alert-success">
+            <strong>Sukces!</strong> Wszystkie dane zostały wyczyszczone
+        </div>
+    }
+    else if (ViewData["Result"] == "Error")
+    {
+        <div class="alert alert-danger">
+            <strong>Błąd!</strong> Podane znaki hasła są nieprawidłowe
+        </div>
+    }
+}
+
+@using (Html.BeginForm("FactoryReset", "Home", FormMethod.Post))
+{
+    int counter = 1;
+    <div style="padding-bottom:5px">
+        Wprowadź hasło <h5 title="Uzupełnij niezaciemnione pola" style="display:inline-block"><b>[?]</b></h5>
+    </div>
+    <div class="btn-group">
+        <div class="btn-group-vertical">
+        @if (Model.Contains(1))
+        {
+            <input type="password" disabled class="form-control input-left" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1" />
+        }
+        else
+        {
+            <input type="password" name="input" id="input @counter" class="form-control input-left" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1" onkeyup="tabFocus(this, @counter)" />
+            counter++;
+        }
+            <h5 style="text-align:center">1</h5>
+        </div>@for (int i = 2; i < 16; i++){<div class="btn-group-vertical">
+             @if (Model.Contains(i))
+             {
+                <input type="password" disabled class="form-control input-center" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1"/>
+             }
+             else
+             {
+                <input type="password" name="input" id="input @counter" class="form-control input-center" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1" onkeyup="tabFocus(this, @counter)"/>
+                counter++;
+             }
+                <h5 style="text-align:center">@i</h5>
+            </div>}<div class="btn-group-vertical">
+            @if (Model.Contains(16))
+            {
+                <input type="password" disabled class="form-control input-right" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1"/>
+            }
+            else
+            {
+               <input type="password" name="input" id="input @counter" class="form-control input-right" style="text-align:center;width:33px;height:33px;display:inline-block" maxlength="1" onkeyup="tabFocus(this, @counter)" />
+               counter++;
+            }
+            <h5 style="text-align:center">16</h5>
+        </div>
+    </div>
+    <div>
+        @Html.ActionLink("Anuluj", "Index", null, new { @class = "btn btn-default", @title = "Wróć do strony głównej" })
+        <input type="submit" value="Resetuj" id="resetBtn" class="btn btn-danger" />
+    </div>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        function tabFocus(input, id)
+        {
+            if (input.value.length == 1) {
+                if (id < 8) {
+                    var name = "input " + (id + 1).toString();
+                    document.getElementById(name).focus();
+                }
+                else {
+                    document.getElementById("resetBtn").focus();
+                }
+            }
+        }
+    </script>
+}

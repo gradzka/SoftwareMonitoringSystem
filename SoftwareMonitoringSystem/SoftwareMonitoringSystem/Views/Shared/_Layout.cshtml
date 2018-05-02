@@ -101,19 +101,7 @@
         <script type="text/javascript">
             $(function () {
                 var state = '@TempData["ChangePassword"]';
-                if (state == '') {
-                    $.post('@Url.Action("CheckDefaultPassword", "Home")')
-                        .done(function (response, status, jqxhr) {
-                            state = response;
-                        })
-                        .fail(function (jqxhr, status, error) {
-                            state = 'True';
-                        })
-                }
-                else {
-                    state = '@TempData["ChangePassword"]' == 'True';
-                }
-
+               
                 if (state) {
                     $("#alertChangePass").show();
                     $("#changePassModal").modal();

@@ -95,12 +95,10 @@
                 @if (item.IsActive == 1)
                 {
                     <span class="btn btn-success" style = "margin-top: 3px; margin-bottom: 3px" >Aktywny</span>
-                    @Html.ActionLink("Aktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-success", @style = "margin-top: 3px; margin-bottom: 3px" })
                 }
                 else
                 {
                     <span class="btn btn-danger" style = "margin-top: 3px; margin-bottom: 3px" >Nieaktywny</span>
-                    @Html.ActionLink("Nieaktywny", "ChangeActive", new { item.DeviceID }, new { @class = "btn btn-danger", @style = "margin-top: 3px; margin-bottom: 3px" })
                 }
             </td>
             <td>
@@ -307,7 +305,7 @@
                 row.cells[3].innerHTML = response.Manufacturer;
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
-                row.cells[6].innerHTML = "<a class=\"btn btn-danger\" href=\"/DevMGMT/ChangeActive?DeviceID=" + response.DeviceID + "\" style=\"margin-top: 3px; margin-bottom: 3px\">Nieaktywny</a> ";
+                row.cells[6].innerHTML = "<span class=\"btn btn-danger\" style=\"margin-top: 3px; margin-bottom: 3px\">Nieaktywny</span>";
                 row.cells[7].innerHTML = "<a href=\"#editModal\" role=\"button\" class=\"btn btn-primary\" style=\"margin-top: 3px; margin-bottom: 7px\" data-toggle=\"modal\" data-backdrop=\"static\" onclick=\"editClick(this)\">Edytuj</a>";
                 row.cells[8].innerHTML = "<input id=\"RDev\" name=\"RDev\" onchange=\"highlightRow(this)\" value=\"true\" type=\"checkbox\"><input name=\"RDev\" value=\"false\" type=\"hidden\">\n ";
                 row.cells[8].align = "center";
