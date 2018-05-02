@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using System.Web.Mvc;
 using System.Web.Security;
 using SoftwareMonitoringSystem.Infrastructure.Abstract;
 using SoftwareMonitoringSystem.Models;
@@ -77,6 +78,32 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                 dbContext.Entry(admin).State = EntityState.Modified;
                 dbContext.SaveChanges();
                 return result;
+            }
+        }
+        public void CheckDefaultPassword(Controller controller)
+        {
+            //Check password
+            using (var dbContext = new SMSDBContext())
+            {
+                SHA512 sha512 = SHA512.Create();
+                Admin admin = dbContext.Admins.SingleOrDefault();
+                if (admin != null)
+                {
+                    //static password
+                    string staticPassword = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + admin.LastEditDate))).Replace("-", string.Empty);//512 bit hash password
+                    if (staticPassword.Equals(admin.Password))
+                    {
+                        controller.TempData["ChangePassword"] = true;
+                    }
+                    else
+                    {
+                        controller.TempData["ChangePassword"] = false;
+                    }
+                }
+                else
+                {
+                    controller.TempData["ChangePassword"] = true;
+                }
             }
         }
     }
