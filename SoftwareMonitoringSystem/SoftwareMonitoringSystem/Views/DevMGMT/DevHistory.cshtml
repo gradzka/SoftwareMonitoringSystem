@@ -1,7 +1,56 @@
-﻿
+﻿<!--model List<ScanAndDevice>-->
 @{
-    ViewBag.Title = "DevHistory";
+    ViewBag.Title = "Historia skanowań urządzenia ?";
 }
 
-<h2>DevHistory</h2>
+<h2>Historia skanowań urządzenia ?</h2>
 
+<div id="alertError" class="alert alert-danger" style="display:none">
+    Error
+</div>
+
+<table class="table" style="margin-bottom:0px;">
+    <tr>
+        <th>ID</th>
+        <th>Data i godzina</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>@Html.ActionLink("04.04.18, 09:10:15", "DevScanDetails", new { id = 123 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
+        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 1)"></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td> @Html.ActionLink("14.01.18, 17:20:51", "DevScanDetails", new { id = 124 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
+        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 2)"></td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    function DeleteScan(btn, id) {
+        var row = btn.parentNode.parentNode;
+        $.post("DeleteScan", { ID: id })
+            .done(function (response, status, jqxhr) {
+                if (response == "Success") {
+                    //TODO
+                    row.parentNode.parentNode.deleteRow(row.rowIndex);
+                    console.log(row);
+                    console.log("OK");
+                    $("#alertError").hide();
+                }
+                else {
+                    $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
+                    $("#alertError").show();
+                }
+
+            })
+            .fail(function (jqxhr, status, error) {
+                $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                $("#alertError").show();
+            })
+    }
+</script>

@@ -1,7 +1,69 @@
-﻿
+﻿<!--model Dictionary<DateTime, List<ScanAndDevice>>-->
 @{
-    ViewBag.Title = "ScanHistory";
+    ViewBag.Title = "Historia skanowań";
 }
 
-<h2>ScanHistory</h2>
+<h2>Historia skanowań</h2>
 
+<div id="alertError" class="alert alert-danger" style="display:none">
+    Error
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">02.05.18</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body" style="overflow:auto">
+                <table class="table" style="margin-bottom:0px;">
+                    <tr>
+                        <th>ID</th>
+                        <th>Urządzenie</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>@Html.ActionLink("Lenovo (192.168.1.111)", "DevScanDetails", new { id = 123 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+                        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
+                        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 1)"></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td> @Html.ActionLink("Acer (192.168.1.112)", "DevScanDetails", new { id = 124 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+                        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
+                        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 2)"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function DeleteScan(btn, id) {
+        var row = btn.parentNode.parentNode;
+        $.post("DeleteScan", { ID: id })
+            .done(function (response, status, jqxhr) {
+                if (response == "Success") {
+                    //TODO
+                    row.parentNode.parentNode.deleteRow(row.rowIndex);
+                    console.log(row);
+                    console.log("OK");
+                    $("#alertError").hide();
+                }
+                else {
+                    $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
+                    $("#alertError").show();
+                }
+
+            })
+            .fail(function (jqxhr, status, error) {
+                $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                $("#alertError").show();
+            })
+    }
+</script>
