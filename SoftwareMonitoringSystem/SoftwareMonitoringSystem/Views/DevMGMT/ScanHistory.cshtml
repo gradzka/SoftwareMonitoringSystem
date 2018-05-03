@@ -55,6 +55,12 @@
                     row.parentNode.parentNode.deleteRow(row.rowIndex);
                     console.log(row);
                     console.log("OK");
+
+                    if (row.parentNode.parentNode.rows.length == 1) {
+                        var panel = row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                        panel.parentNode.removeChild(panel);
+                    }
+
                     $("#alertError").hide();
                 }
                 else {

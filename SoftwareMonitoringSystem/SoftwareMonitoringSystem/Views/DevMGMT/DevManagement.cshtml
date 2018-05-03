@@ -358,11 +358,12 @@
                 e.preventDefault() // prevent the form's normal submission
                 var dataToPost = $(this).serialize()
 
-                $.post('@Url.Action("Edit", "Home")', dataToPost)
+                $.post('@Url.Action("Edit", "DevMGMT")', dataToPost)
                     .done(function (response, status, jqxhr) {
                         if (response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz prawidłowy adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz prawidłowy adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
                             $("#alertErrorEditDevice").hide();
                             $("#alertSuccessEditDevice").show();
+                            //podmień w wierszu
                         }
                         else {
                             $("#alertErrorEditDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
