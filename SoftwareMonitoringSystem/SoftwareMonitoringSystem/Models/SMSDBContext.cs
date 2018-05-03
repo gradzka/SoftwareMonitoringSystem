@@ -6,7 +6,6 @@ namespace SoftwareMonitoringSystem
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity;
-    using System.Linq;
 
     public class SMSDBContext : DbContext
     {
@@ -35,6 +34,7 @@ namespace SoftwareMonitoringSystem
         public DbSet<Scan> Scans { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<Admin> Admins { get; set; }
+        public DbSet<Setting> Settings { get; set; }
     }
 
     //public class MyEntity
@@ -60,7 +60,6 @@ namespace SoftwareMonitoringSystem
         public int IsSuccessful { get; set; }
         public virtual Scan Scan { get; set; }
         public virtual Device Device { get; set; }
-
     }
     [Table("Scans")]
     public class Scan
@@ -121,5 +120,18 @@ namespace SoftwareMonitoringSystem
         public int LogInAttemptCounter { get; set; }
         public Nullable<DateTime> LastLogInAttemptDate { get; set; }
         public DateTime LastEditDate { get; set; }
+    }
+    [Table("Settings")]
+    public class Setting
+    {
+        public Setting()
+        {
+            this.Password = "SERisOZ/SPHucGRHtHTe/UlmO0szHoySGwaqjcepsWQ=";
+        }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int SettingID { get; set; }
+        [MaxLength(44), Required]
+        public string Password { get; set; }
+
     }
 }
