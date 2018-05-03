@@ -5,3 +5,50 @@
 
 <h2>Szczegóły skanowania</h2>
 
+<div>
+    <hr />
+    <table style="width: 100%">
+        <tr>
+            <td align="right" style="width:49%; color: #cfcfcf">Nazwa urządzenia:</td>
+            <td></td>
+            <td style="width: 49%"><!--Html.DisplayFor(model => model.)-->Work device</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #cfcfcf">Data i godzina skanowania:</td>
+            <td></td>
+            <td style="width: 49%"><!--Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.))-->04.04.18 09:44:12</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #cfcfcf">Status:</td>
+            <td></td>
+            <td style="width: 49%"><!--Html.DisplayFor(model => model.)-->Powodzenie</td>
+        </tr>
+    </table>
+</div>
+
+<br />
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Visual Studio 2017</a>
+            </h4>
+        </div>
+        <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body" style="overflow:auto">
+                <div><b>Wersja: </b>15.6.7</div>
+                <div><b>Klucz produktu: </b>XXXXX-XXXXX-XXXXX</div>   
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<p>
+    @Html.ActionLink("Powrót do skanowań tego urządzenia", "DevHistory")
+</p>
+<p>
+    @Html.ActionLink("Powrót do skanowań wszystkich urządzeń", "ScanHistory")
+</p>
