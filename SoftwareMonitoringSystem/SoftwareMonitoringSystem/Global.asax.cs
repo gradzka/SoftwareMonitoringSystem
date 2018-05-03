@@ -28,18 +28,19 @@ namespace SoftwareMonitoringSystem
             {
                 if (dbContext.Admins.Count() == 0)
                 {
-                    DateTime now = DateTime.Now;
                     using (var sha512 = SHA512.Create())
                     {
-                        string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + now))).Replace("-", string.Empty);
+                        DateTime time = DateTime.MinValue;
+                        string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + time))).Replace("-", string.Empty);
                         Admin admin = new Admin();
                         admin.Username = "admin";
                         admin.Password = pAbbrev;
-                        admin.LastEditDate = now;
                         dbContext.Admins.Add(admin);
-                        dbContext.Settings.Add(new Setting());
-                        dbContext.SaveChanges();
+                        //
+                        //
                     }
+                        dbContext.Settings.Add(new Setting());
+                        dbContext.SaveChanges();   
                 }
             }
         }

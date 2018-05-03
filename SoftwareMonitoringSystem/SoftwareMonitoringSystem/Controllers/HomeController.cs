@@ -15,7 +15,6 @@ using System.IO;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
-    [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]
     public class HomeController : Controller
     {
         IAuthProvider authProvider;
@@ -90,10 +89,10 @@ namespace SoftwareMonitoringSystem.Controllers
                                     //ReEncrypt factory reset password
                                     using (var sha256 = SHA256.Create())
                                     {
-                                        byte[] oldKey = sha256.ComputeHash(Encoding.Default.GetBytes(aPAbbrev));
-                                        byte[] newKey = sha256.ComputeHash(Encoding.Default.GetBytes(newPAbbrev));
-                                        
-                                        ReEncrypt(oldKey, newKey,dbContext.Settings.FirstOrDefault().Password);
+                                        byte[] oldKey = sha256.ComputeHash(Encoding.Default.GetBytes(aPAbbrevDate));
+                                        byte[] newKey = sha256.ComputeHash(Encoding.Default.GetBytes(newPAbbrevDate));
+
+                                        ReEncrypt(oldKey, newKey, dbContext.Settings.FirstOrDefault().Password);
                                         TempData["ChangePassword"] = false;
                                         return Json("Success");
                                     }
@@ -120,7 +119,7 @@ namespace SoftwareMonitoringSystem.Controllers
                 }
             }
         }
-        public ActionResult FactoryReset()
+        public List<int> RandIndexes()
         {
             List<int> blockedIndexes = new List<int>();
             List<int> nonBlockedIndexes = new List<int>();
@@ -140,19 +139,99 @@ namespace SoftwareMonitoringSystem.Controllers
                 nonBlockedIndexes.Remove(index);
             }
             TempData["NonBlockedIndexes"] = nonBlockedIndexes;
-            return View(blockedIndexes);
+            return blockedIndexes;
+        }
+        public ActionResult FactoryReset()
+        {
+            return View(RandIndexes());
         }
         [HttpPost]
-        public ActionResult FactoryReset(List<int> indexes)
+        public ActionResult FactoryReset(List<string> indexes)
         {
-            if (indexes.Count == 8)
+            using (var context = new SMSDBContext())
             {
-                for (int i = 0; i < 8; i++)
+                byte[] key;
+                using (var sha256 = SHA256.Create())
                 {
-                    //TempData["NonBlockedIndexes"]
+                    key = sha256.ComputeHash(Encoding.Default.GetBytes(context.Admins.SingleOrDefault().Password));
                 }
+                string password = decrypt(key, System.Convert.FromBase64String(context.Settings.SingleOrDefault().Password), "admin");
+
+                if (indexes.Count == 8)
+                {
+                    int iter = 0;
+                    List<int> nonBlockedIndexes = (List<int>)TempData["NonBlockedIndexes"];
+                    if (nonBlockedIndexes != null)
+                    {
+                        foreach (var non in nonBlockedIndexes)
+                        {
+                            if (password[non - 1] == indexes[iter][0])
+                            {
+                                iter++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        if (iter == 8)
+                        {
+                            ViewData["Result"] = "Success";
+                            if (Request.IsAuthenticated)
+                            {
+                                FormsAuthentication.SignOut();
+                            }
+                            //***** Clear tables
+                            //Admins
+                            var admins = context.Admins;
+                            context.Admins.RemoveRange(admins);
+                            //ScansAndDevices
+                            var scansAndDevices = context.ScansAndDevices;
+                            context.ScansAndDevices.RemoveRange(scansAndDevices);
+                            //Devices
+                            var devices = context.Devices;
+                            context.Devices.RemoveRange(devices);
+                            //Scans
+                            var scans = context.Scans;
+                            context.Scans.RemoveRange(scans);
+                            //Settings
+                            var settings = context.Settings;
+                            context.Settings.RemoveRange(settings);
+
+                            context.SaveChanges();
+
+                            //Reseed
+                            context.Database.ExecuteSqlCommand("update sqlite_sequence set seq = 0 where name = 'Admins'");
+                            context.Database.ExecuteSqlCommand("update sqlite_sequence set seq = 0 where name = 'Devices'");
+                            context.Database.ExecuteSqlCommand("update sqlite_sequence set seq = 0 where name = 'Scans'");
+                            context.Database.ExecuteSqlCommand("update sqlite_sequence set seq = 0 where name = 'Settings'");
+
+                            context.SaveChanges();
+
+
+                            using (var sha512 = SHA512.Create())
+                            {
+                                DateTime time = DateTime.MinValue;
+                                string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + time))).Replace("-", string.Empty);
+                                Admin admin = new Admin();
+                                admin.Username = "admin";
+                                admin.Password = pAbbrev;
+                                context.Admins.Add(admin);
+                            }
+                            context.Settings.Add(new Setting());
+                            context.SaveChanges();
+                            //******
+
+                        }
+                        else
+                        {
+                            ViewData["Result"] = "Error";
+                        }
+                    }
+                }
+
             }
-            return RedirectToAction("FactoryReset", "Home");
+            return View(RandIndexes());
         }
         public void ReEncrypt(byte[] oldKey, byte[] newKey, string message)
         {
@@ -173,7 +252,7 @@ namespace SoftwareMonitoringSystem.Controllers
                 byte[] IV = (sha256.ComputeHash(Encoding.Default.GetBytes(login))).Take(16).ToArray();
                 using (Aes aes = new AesCryptoServiceProvider())
                 {
-                    aes.Key = sha256.ComputeHash(key);
+                    aes.Key = key;
                     aes.IV = IV;
                     // Encrypt the message
                     using (MemoryStream ciphertext = new MemoryStream())
@@ -195,7 +274,7 @@ namespace SoftwareMonitoringSystem.Controllers
                 byte[] IV = (sha256.ComputeHash(Encoding.Default.GetBytes(login))).Take(16).ToArray();
                 using (Aes aes = new AesCryptoServiceProvider())
                 {
-                    aes.Key = sha256.ComputeHash(key);
+                    aes.Key = key;
                     aes.IV = IV;
                     // Decrypt the message
                     using (MemoryStream plaintext = new MemoryStream())

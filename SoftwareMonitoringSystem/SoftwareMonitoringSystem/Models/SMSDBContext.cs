@@ -6,6 +6,7 @@ namespace SoftwareMonitoringSystem
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity;
+    using System.Globalization;
 
     public class SMSDBContext : DbContext
     {
@@ -69,7 +70,7 @@ namespace SoftwareMonitoringSystem
             ScansAndDevices = new HashSet<ScanAndDevice>();
         }
 
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Autoincrement]
         public int ScanID { get; set; }
         [Required]
         public DateTime ScanDateTime { get; set; }
@@ -85,7 +86,7 @@ namespace SoftwareMonitoringSystem
             ScansAndDevices = new HashSet<ScanAndDevice>();
         }
 
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Autoincrement]
         public int DeviceID { get; set; }
         [MinLength(17), MaxLength(17), Required]
         public string MACAddress { get; set; }
@@ -107,10 +108,10 @@ namespace SoftwareMonitoringSystem
         public Admin()
         {
             LogInAttemptCounter = 0;
-            LastEditDate = DateTime.Now;
+            LastEditDate = DateTime.MinValue;
         }
 
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Autoincrement]
         public int AdminID { get; set; }
         [MinLength(5), MaxLength(5), Required]
         public string Username { get; set; }
@@ -126,9 +127,9 @@ namespace SoftwareMonitoringSystem
     {
         public Setting()
         {
-            this.Password = "SERisOZ/SPHucGRHtHTe/UlmO0szHoySGwaqjcepsWQ=";
+            this.Password = "3RFbUcJvdIox+NK6bKofC7NVxjgbx8PkMBrRAkjhduQ=";
         }
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Autoincrement]
         public int SettingID { get; set; }
         [MaxLength(44), Required]
         public string Password { get; set; }
