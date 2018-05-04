@@ -165,6 +165,10 @@ namespace SoftwareMonitoringSystem.Controllers
                         {
                             dbContext.Devices.Remove(device);
                         }
+                        else
+                        {
+                            return Json("Błąd wewnętrzny systemu");
+                        }
                     }
                     dbContext.SaveChanges();
                     return Json("Success");
@@ -172,7 +176,7 @@ namespace SoftwareMonitoringSystem.Controllers
             }
             catch
             {
-                return Json("Error");
+                return Json("Błąd wewnętrzny systemu");
             }
         }
         [HttpGet]
@@ -205,7 +209,16 @@ namespace SoftwareMonitoringSystem.Controllers
                                             D_S_IDDescStatus D_S_IDDescStatus = new D_S_IDDescStatus();
                                             D_S_IDDescStatus.DeviceID = device.DeviceID;
                                             D_S_IDDescStatus.ScanID = scan.ScanID;
-                                            D_S_IDDescStatus.Description = device.Description;
+                                            string deviceDescription = device.Description;
+                                            string toDevDesc = "(" + device.IPAddress + ", " + device.IPAddress + ")";
+                                            if (deviceDescription == "")
+                                            {
+                                                D_S_IDDescStatus.Description = toDevDesc;
+                                            }
+                                            else
+                                            {
+                                                D_S_IDDescStatus.Description = deviceDescription + " " + toDevDesc;
+                                            }
                                             if (D_IDStatus.IsSuccessful == 0)
                                             {
                                                 D_S_IDDescStatus.Status = "Niepowodzenie";
