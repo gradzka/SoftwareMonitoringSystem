@@ -210,7 +210,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                             D_S_IDDescStatus.DeviceID = device.DeviceID;
                                             D_S_IDDescStatus.ScanID = scan.ScanID;
                                             string deviceDescription = device.Description;
-                                            string toDevDesc = "(" + device.IPAddress + ", " + device.IPAddress + ")";
+                                            string toDevDesc = "(" + device.MACAddress + ", " + device.IPAddress + ")";
                                             if (deviceDescription == "")
                                             {
                                                 D_S_IDDescStatus.Description = toDevDesc;
@@ -225,7 +225,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                             }
                                             else
                                             {
-                                                D_S_IDDescStatus.Status = "Sukces";
+                                                D_S_IDDescStatus.Status = "Powodzenie";
                                             }
 
                                             if (!dict.ContainsKey(scan.ScanDateTime))//key exists
