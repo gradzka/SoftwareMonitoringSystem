@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using System.Collections.Specialized;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
@@ -187,7 +188,7 @@ namespace SoftwareMonitoringSystem.Controllers
             Dictionary<DateTime, List<D_S_IDDescStatus>> dict = new Dictionary<DateTime, List<D_S_IDDescStatus>>();
             using (var context = new SMSDBContext())
             {
-                List<Scan> scans = context.Scans.ToList();
+                List<Scan> scans = context.Scans.OrderByDescending(x=>x.ScanDateTime).ToList();
                 if (scans.Count>0)
                 {
                     List<ScanAndDevice> scansAndDevices = context.ScansAndDevices.ToList();
@@ -257,7 +258,6 @@ namespace SoftwareMonitoringSystem.Controllers
                     //lista skanowan jest pusta
                 }
             }
-            dict = dict.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => (List<D_S_IDDescStatus>) x.Value.OrderBy(y => y.DeviceID).ToList());
             return View(dict);
         }
 
