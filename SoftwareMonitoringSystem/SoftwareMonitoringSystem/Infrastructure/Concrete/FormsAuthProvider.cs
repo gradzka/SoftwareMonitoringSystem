@@ -97,7 +97,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                 }
                 else
                 {
-                    loginCounter++;
+                    if (loginCounter<3) loginCounter++;
                     admin.LogInAttemptCounter = loginCounter;
                 }
 
