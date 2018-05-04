@@ -112,7 +112,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
             using (var dbContext = new SMSDBContext())
             {
                 DateTime dateDB = dbContext.Admins.SingleOrDefault().LastEditDate;
-                if (dateDB!=null)
+                if (dateDB != null)
                 {
                     if (dateDB == DateTime.MinValue)
                     {
@@ -127,6 +127,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                 {
                     controller.Session["ChangePassword"] = true;
                 }
+            }
         }
     }
 }

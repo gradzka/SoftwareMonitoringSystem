@@ -97,7 +97,7 @@ namespace SoftwareMonitoringSystem.Controllers
         [HttpPost]
         public ActionResult Edit(int DeviceID, string MACAddress, string Manufacturer, string IPAddress, string Description)
         {
-            if (DeviceID < 0 && MACAddress != "" && Manufacturer != "" && IPAddress != "" && Description != "")
+            if (DeviceID > 0 && MACAddress != "" && Manufacturer != "" && IPAddress != "" && Description != "")
             {
                 Regex MACAddr = new Regex(@"^[a-fA-F0-9-]{17}|[a-fA-F0-9:]{17}$");
                 Regex IPv4Addr = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]{1,5})?$");
@@ -105,7 +105,7 @@ namespace SoftwareMonitoringSystem.Controllers
                 {
                     using (var dbContext = new SMSDBContext())
                     {
-                        if (dbContext.Devices.Count(x => x.IPAddress.Equals(IPAddress)) > 0)
+                        if (dbContext.Devices.Count(x => x.MACAddress.Equals(MACAddr) && x.DeviceID!=DeviceID) > 0)
                         {
                             return Json("Wpisz inny adres MAC (podany jest zajęty)");
                         }
@@ -113,7 +113,7 @@ namespace SoftwareMonitoringSystem.Controllers
                         {
                             if (IPv4Addr.IsMatch(IPAddress))
                             {
-                                if (dbContext.Devices.Count(x => x.IPAddress.Equals(IPAddress)) > 0)
+                                if (dbContext.Devices.Count(x => x.IPAddress.Equals(IPAddress) && x.DeviceID!=DeviceID) > 0)
                                 {
                                     return Json("Wpisz inny adres IP (podany jest zajęty)");
                                 }
