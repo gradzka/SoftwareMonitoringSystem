@@ -1,9 +1,9 @@
-﻿<!--model List<ScanAndDevice>-->
+﻿@model List<SoftwareMonitoringSystem.Models.D_S_IDDateStatus>
 @{
-    ViewBag.Title = "Historia skanowań urządzenia Work device (192.168.1.111)";
+    ViewBag.Title = "Historia skanowań urządzenia " + TempData.Peek("DevHistoryDesc");
 }
 
-<h2>Historia skanowań urządzenia Work device (192.168.1.111)</h2>
+<h3>Historia skanowań urządzenia @TempData["DevHistoryDesc"]</h3>
 
 <div id="alertError" class="alert alert-danger" style="display:none">
     Error
@@ -13,27 +13,28 @@
 
 <table class="table" style="margin-bottom:0px;">
     <tr>
-        <th>ID</th>
-        <th>Data i godzina</th>
-        <th>Status</th>
-        <th></th>
+        <th class="col-md-1">ID</th>
+        <th class="col-md-8">Data i godzina</th>
+        <th class="col-md-2">Status</th>
+        <th class="col-md-1"></th>
     </tr>
-    <tr>
-        <td>1</td>
-        <td>@Html.ActionLink("04.04.18, 09:10:15", "DevScanDetails", new { id = 123 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
-        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
-        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 1)"></td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td> @Html.ActionLink("14.01.18, 17:20:51", "DevScanDetails", new { id = 124 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
-        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
-        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 2)"></td>
-    </tr>
+    @{
+        int counter = 1;
+        foreach (SoftwareMonitoringSystem.Models.D_S_IDDateStatus item in Model)
+        {
+            <tr>
+                <td class="col-md-1">@counter</td>          
+                <td class="col-md-8">@Html.ActionLink(@Convert.ToString(string.Format("{0:dd.MM.yyyy, HH:mm:ss}", item.DateTime)), "DevScanDetails", new { ScanID = item.ScanID, DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+                <td class="col-md-2">@item.Status</td>
+                <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, item.ScanID, item.DeviceID)"></td>
+            </tr>
+            counter++;
+        }
+    }
 </table>
 
 <script type="text/javascript">
-    function DeleteScan(btn, id) {
+    function DeleteScan(btn, scanID, devID) {
         var row = btn.parentNode.parentNode;
         $.post("DeleteScan", { ID: id })
             .done(function (response, status, jqxhr) {

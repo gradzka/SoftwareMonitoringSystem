@@ -1,4 +1,4 @@
-﻿<!--model Dictionary<DateTime, List<ScanAndDevice>>-->
+﻿@model Dictionary<DateTime, List<SoftwareMonitoringSystem.Models.D_S_IDDescStatus>>
 @{
     ViewBag.Title = "Historia skanowań";
 }
@@ -11,42 +11,46 @@
 
 <br />
 
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">
-                <a data-toggle="collapse" href="#collapse1">02.05.18</a>
-            </h4>
-        </div>
-        <div id="collapse1" class="panel-collapse collapse">
-            <div class="panel-body" style="overflow:auto">
-                <table class="table" style="margin-bottom:0px;">
-                    <tr>
-                        <th>ID</th>
-                        <th>Urządzenie</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>@Html.ActionLink("Work device (192.168.1.111)", "DevScanDetails", new { id = 123 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
-                        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
-                        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 1)"></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td> @Html.ActionLink("Work device2 (192.168.1.112)", "DevScanDetails", new { id = 124 }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
-                        <td><!--Html.DisplayFor(modelItem => item.IPAddress)-->Powodzenie</td>
-                        <td align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, 2)"></td>
-                    </tr>
-                </table>
+@{
+    int counter = 1;
+    foreach (KeyValuePair<DateTime, List<SoftwareMonitoringSystem.Models.D_S_IDDescStatus>> item in Model)
+    {
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="@("#collapse" + counter)">@Convert.ToString(string.Format("{0:dd.MM.yyyy}", item.Key))</a>
+                    </h4>
+                </div>
+                <div id="@("collapse" + counter)" class="panel-collapse collapse">
+                    <div class="panel-body" style="overflow:auto">
+                        <table class="table" style="margin-bottom:0px;">
+                            <tr>
+                                <th class="col-md-1">ID</th>
+                                <th class="col-md-8">Urządzenie</th>
+                                <th class="col-md-2">Status</th>
+                                <th class="col-md-1"></th>
+                            </tr>
+                            @foreach (SoftwareMonitoringSystem.Models.D_S_IDDescStatus scan in item.Value)
+                            {
+                                <tr>
+                                    <td class="col-md-1">@counter</td>
+                                    <td class="col-md-8">@Html.ActionLink(scan.Description, "DevScanDetails", new { ScanID = scan.ScanID, DeviceID = scan.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
+                                    <td class="col-md-2">@scan.Status</td>
+                                    <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, scan.ScanID, scan.DeviceID)"></td>
+                                </tr>
+                                counter++;
+                            }
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    }
+}
 
 <script type="text/javascript">
-    function DeleteScan(btn, id) {
+    function DeleteScan(btn, scanID, devID) {
         var row = btn.parentNode.parentNode;
         $.post("DeleteScan", { ID: id })
             .done(function (response, status, jqxhr) {

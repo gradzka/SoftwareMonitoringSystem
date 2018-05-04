@@ -87,7 +87,7 @@
         <tr>
             <td align="center">@Html.CheckBox("LDev", false)</td>
             <td>@Html.DisplayFor(modelItem => item.DeviceID)</td>
-            <td>@Html.ActionLink(item.MACAddress, "DevHistory", new { id = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do historii skanowań urządzenia" })</td>
+            <td>@Html.ActionLink(item.MACAddress, "DevHistory", new { DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do historii skanowań urządzenia" })</td>
             <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
             <td>@Html.DisplayFor(modelItem => item.IPAddress)</td>
             <td>@Html.DisplayFor(modelItem => item.Description)</td>
