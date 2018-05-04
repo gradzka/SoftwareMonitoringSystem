@@ -225,7 +225,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                             }
                                             else
                                             {
-                                                D_S_IDDescStatus.Status = "Powodzenie";
+                                                D_S_IDDescStatus.Status = "Sukces";
                                             }
 
                                             if (!dict.ContainsKey(scan.ScanDateTime))//key exists
@@ -273,45 +273,59 @@ namespace SoftwareMonitoringSystem.Controllers
             List<D_S_IDDateStatus> d_S_IDDateStatuses = new List<D_S_IDDateStatus>();
             using (var context = new SMSDBContext())
             {
-                var scansAndDevices = context.ScansAndDevices.Where(x => x.DeviceID == DeviceID).Select(x => new { x.ScanID, x.IsSuccessful });
-                if (scansAndDevices!=null)
+                Device device = context.Devices.Where(x => x.DeviceID == DeviceID).FirstOrDefault();
+                if (device != null)
                 {
-                    List<Scan> scans = context.Scans.ToList();
-                    if (scans.Count>0)
+                    string description = device.Description;
+                    string toDevDesc = "(" + device.MACAddress + ", " + device.IPAddress + ")";
+                    if (description == "")
                     {
-                        D_S_IDDateStatus d_S_IDDateStatus = new D_S_IDDateStatus();
-                        foreach (var scanAndDevice in scansAndDevices)
+                        TempData["DevHistoryDesc"] = toDevDesc;
+                    }
+                    else
+                    {
+                        TempData["DevHistoryDesc"] = description + " " + toDevDesc;
+                    }
+                    var scansAndDevices = context.ScansAndDevices.Where(x => x.DeviceID == DeviceID).Select(x => new { x.ScanID, x.IsSuccessful });
+                    if (scansAndDevices != null)
+                    {
+                        List<Scan> scans = context.Scans.ToList();
+                        if (scans.Count > 0)
                         {
-                            d_S_IDDateStatus.DeviceID = DeviceID;
-                            d_S_IDDateStatus.ScanID = scanAndDevice.ScanID;
-                            if (scanAndDevice.IsSuccessful == 0)
+                            foreach (var scanAndDevice in scansAndDevices)
                             {
-                                d_S_IDDateStatus.Status = "Niepowodzenie";
+                                D_S_IDDateStatus d_S_IDDateStatus = new D_S_IDDateStatus();
+                                d_S_IDDateStatus.DeviceID = DeviceID;
+                                d_S_IDDateStatus.ScanID = scanAndDevice.ScanID;
+                                if (scanAndDevice.IsSuccessful == 0)
+                                {
+                                    d_S_IDDateStatus.Status = "Niepowodzenie";
+                                }
+                                else
+                                {
+                                    d_S_IDDateStatus.Status = "Sukces";
+                                }
+                                DateTime dateTime = scans.Where(x => x.ScanID == scanAndDevice.ScanID).Select(x => x.ScanDateTime).FirstOrDefault();
+                                if (dateTime != null)
+                                {
+                                    d_S_IDDateStatus.DateTime = dateTime;
+                                }
+                                else
+                                {
+                                    d_S_IDDateStatus.DateTime = DateTime.MinValue;
+                                }
+                                d_S_IDDateStatuses.Add(d_S_IDDateStatus);
                             }
-                            else
-                            {
-                                d_S_IDDateStatus.Status = "Sukces";
-                            }
-                            DateTime dateTime = scans.Where(x => x.ScanID == scanAndDevice.ScanID).Select(x => x.ScanDateTime).FirstOrDefault();
-                            if (dateTime != null)
-                            {
-                                d_S_IDDateStatus.DateTime = dateTime;
-                            }
-                            else
-                            {
-                                d_S_IDDateStatus.DateTime = DateTime.MinValue;
-                            }
-                            d_S_IDDateStatuses.Add(d_S_IDDateStatus);
+                        }
+                        else
+                        {
+                            //lista scans jest pusta
                         }
                     }
                     else
                     {
-                        //lista scans jest pusta
+                        //lista scansAndDevices jest pusta
                     }
-                }
-                else
-                {
-                    //lista scansAndDevices jest pusta
                 }
             }
             return View(d_S_IDDateStatuses);
