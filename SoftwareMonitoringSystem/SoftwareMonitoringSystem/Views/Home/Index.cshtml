@@ -18,14 +18,14 @@
     </div>
 </div>
 
-@using (Html.BeginForm("Login", "Home", FormMethod.Post))
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
-    if (ViewBag.Alert != null)
-    {
+    if (TempData["LogInAlert"] != null)
+    { 
         <div class="alert alert-danger" style="text-align:center; margin-bottom:15px">
-            @ViewBag.Alert
+            <b>Błąd! </b>@TempData["LogInAlert"]
         </div>
     }
 
