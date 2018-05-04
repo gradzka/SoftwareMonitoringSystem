@@ -26,7 +26,7 @@
                 <td class="col-md-1">@counter</td>          
                 <td class="col-md-8">@Html.ActionLink(@Convert.ToString(string.Format("{0:dd.MM.yyyy, HH:mm:ss}", item.DateTime)), "DevScanDetails", new { ScanID = item.ScanID, DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
                 <td class="col-md-2">@item.Status</td>
-                <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, item.ScanID, item.DeviceID)"></td>
+                <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, @item.ScanID, @item.DeviceID)"></td>
             </tr>
             counter++;
         }
@@ -39,10 +39,7 @@
         $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
                 if (response == "Success") {
-                    //TODO
                     row.parentNode.parentNode.deleteRow(row.rowIndex);
-                    console.log(row);
-                    console.log("OK");
                     $("#alertError").hide();
                 }
                 else {

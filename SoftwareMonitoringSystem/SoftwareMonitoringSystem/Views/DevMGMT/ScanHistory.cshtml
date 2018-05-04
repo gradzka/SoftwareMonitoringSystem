@@ -39,7 +39,7 @@
                                     <td class="col-md-1">@counter</td>
                                     <td class="col-md-8">@Html.ActionLink(scan.Description, "DevScanDetails", new { ScanID = scan.ScanID, DeviceID = scan.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
                                     <td class="col-md-2">@scan.Status</td>
-                                    <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, scan.ScanID, scan.DeviceID)"></td>
+                                    <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, @scan.ScanID, @scan.DeviceID)"></td>
                                 </tr>
                                 counter++;
                             }
@@ -58,13 +58,10 @@
         $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
                 if (response == "Success") {
-                    //TODO
+                    var number = row.parentNode.parentNode.rows.length;
+                    var panel = row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
                     row.parentNode.parentNode.deleteRow(row.rowIndex);
-                    console.log(row);
-                    console.log("OK");
-
-                    if (row.parentNode.parentNode.rows.length == 1) {
-                        var panel = row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                    if (number == 2) {  
                         panel.parentNode.removeChild(panel);
                     }
 
