@@ -33,7 +33,7 @@ namespace SoftwareMonitoringSystem.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult LogIn(Login loginData)
+        public ActionResult Index(Login loginData)
         {
             if (ModelState.IsValid)
             {
@@ -42,32 +42,33 @@ namespace SoftwareMonitoringSystem.Controllers
                 {
                     case -2:
                         {
-                            Session["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
                             break;
                         }
                     case -1:
                         {
-                            Session["LogInAlert"] = "Błędne dane logowania";
+                            TempData["LogInAlert"] = "Błędne dane logowania";
                             break;
                         }
                     case 0:
                         {
-                            Session["LogInAlert"] = "Konto zablokowane czasowo";
+                            TempData["LogInAlert"] = "Konto zablokowane czasowo";
                             break;
                         }
                     case 1:
                         {
-                            Session["LogInAlert"] = "";
-                            break;
+                            TempData["LogInAlert"] = null;
+                            authProvider.CheckDefaultPassword(this);
+                            return RedirectToAction("GetDevices", "DevMGMT");
                         }
                     default:
                         {
-                            Session["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
                             break;
                         }
                 }
             }
-            return RedirectToAction("Index", "Home");
+            return View();
         }
         [HttpPost, Authorize]
         public ActionResult LogOut()
