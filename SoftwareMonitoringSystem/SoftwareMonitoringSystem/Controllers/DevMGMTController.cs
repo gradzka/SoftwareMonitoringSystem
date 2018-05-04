@@ -257,6 +257,7 @@ namespace SoftwareMonitoringSystem.Controllers
                     //lista skanowan jest pusta
                 }
             }
+            dict = dict.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => (List<D_S_IDDescStatus>) x.Value.OrderBy(y => y.DeviceID).ToList());
             return View(dict);
         }
 
@@ -328,6 +329,7 @@ namespace SoftwareMonitoringSystem.Controllers
                     }
                 }
             }
+            d_S_IDDateStatuses = d_S_IDDateStatuses.OrderByDescending(x => x.DateTime).ToList();
             return View(d_S_IDDateStatuses);
         }
         [HttpGet]
