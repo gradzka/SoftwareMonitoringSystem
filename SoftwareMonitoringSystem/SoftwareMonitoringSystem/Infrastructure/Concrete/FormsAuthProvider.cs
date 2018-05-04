@@ -30,6 +30,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
             {
                 DateTime now = DateTime.Now;
                 Admin admin = dbContext.Admins.SingleOrDefault();
+                int loginCounter = -1;
                 if (loginData.login != "" && loginData.password != "")
                 {
                     using (var sha512 = SHA512.Create())
@@ -37,7 +38,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                         DateTime editdate = admin.LastEditDate;
                         if (editdate != null)
                         {
-                            int loginCounter = admin.LogInAttemptCounter;
+                            loginCounter = admin.LogInAttemptCounter;
                             if (loginCounter >= 3)
                             {
                                 DateTime? lastLoginAttemptDate = admin.LastLogInAttemptDate;
@@ -58,7 +59,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                                     result = -2;
                                 }
                             }
-                            else if (loginCounter < 3)
+                            if (loginCounter < 3)
                             {
                                 string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(loginData.password))).Replace("-", string.Empty);
                                 string pAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(pAbbrev + editdate))).Replace("-", string.Empty);
@@ -96,7 +97,8 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                 }
                 else
                 {
-                    admin.LogInAttemptCounter++;
+                    loginCounter++;
+                    admin.LogInAttemptCounter = loginCounter;
                 }
 
                 dbContext.Entry(admin).State = EntityState.Modified;
@@ -109,26 +111,22 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
             //Check password
             using (var dbContext = new SMSDBContext())
             {
-                SHA512 sha512 = SHA512.Create();
-                Admin admin = dbContext.Admins.SingleOrDefault();
-                if (admin != null)
+                DateTime dateDB = dbContext.Admins.SingleOrDefault().LastEditDate;
+                if (dateDB!=null)
                 {
-                    //static password
-                    string staticPassword = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes("9CE1EB62332A144B0A752460F9E789B2E4A6D7403D2E18041C4E80352DB736C51FD247301E079CEF9EDE13DFDCF3D040A3F0843E4D92073FDEA29F5838C421F3" + admin.LastEditDate))).Replace("-", string.Empty);//512 bit hash password
-                    if (staticPassword == admin.Password)
+                    if (dateDB == DateTime.MinValue)
                     {
-                        controller.TempData["ChangePassword"] = true;
+                        controller.Session["ChangePassword"] = true;
                     }
                     else
                     {
-                        controller.TempData["ChangePassword"] = false;
+                        controller.Session["ChangePassword"] = false;
                     }
                 }
                 else
                 {
-                    controller.TempData["ChangePassword"] = true;
+                    controller.Session["ChangePassword"] = true;
                 }
-            }
         }
     }
 }

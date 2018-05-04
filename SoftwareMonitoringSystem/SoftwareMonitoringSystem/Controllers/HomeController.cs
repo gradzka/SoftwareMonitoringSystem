@@ -42,27 +42,27 @@ namespace SoftwareMonitoringSystem.Controllers
                 {
                     case -2:
                         {
-                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            Session["LogInAlert"] = "Błąd wewnętrzny systemu";
                             break;
                         }
                     case -1:
                         {
-                            TempData["LogInAlert"] = "Błędne dane logowania";
+                            Session["LogInAlert"] = "Błędne dane logowania";
                             break;
                         }
                     case 0:
                         {
-                            TempData["LogInAlert"] = "Konto zablokowane czasowo";
+                            Session["LogInAlert"] = "Konto zablokowane czasowo";
                             break;
                         }
                     case 1:
                         {
-                            TempData["LogInAlert"] = "";
+                            Session["LogInAlert"] = "";
                             break;
                         }
                     default:
                         {
-                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            Session["LogInAlert"] = "Błąd wewnętrzny systemu";
                             break;
                         }
                 }
@@ -73,6 +73,7 @@ namespace SoftwareMonitoringSystem.Controllers
         public ActionResult LogOut()
         {
             FormsAuthentication.SignOut();
+            Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
@@ -118,7 +119,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                         byte[] newKey = sha256.ComputeHash(Encoding.Default.GetBytes(newPAbbrevDate));
 
                                         ReEncrypt(oldKey, newKey, dbContext.Settings.FirstOrDefault().Password);
-                                        TempData["ChangePassword"] = false;
+                                        Session["ChangePassword"] = false;
                                         return Json("Success");
                                     }
                                 }
