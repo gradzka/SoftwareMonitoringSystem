@@ -338,5 +338,45 @@ namespace SoftwareMonitoringSystem.Controllers
             authProvider.CheckDefaultPassword(this);
             return View();
         }
+        [HttpPost]
+        public ActionResult DeleteScan(int ScanID, int DeviceID)
+        {
+            try
+            {
+                using (var context = new SMSDBContext())
+                {
+                    int number = context.ScansAndDevices.Count(x => x.ScanID == ScanID);
+                    ScanAndDevice scanAndDevice = context.ScansAndDevices.Where(x => x.ScanID == ScanID && x.DeviceID == DeviceID).FirstOrDefault();
+                    if (scanAndDevice!=null)
+                    {
+                        context.ScansAndDevices.Remove(scanAndDevice);
+                        context.SaveChanges();
+                    }
+                    else
+                    {
+                        return Json("Błąd wewnętrzny systemu");
+                    }
+                    if (number == 1)
+                    {
+                        Scan scan = context.Scans.Where(x => x.ScanID == ScanID).FirstOrDefault();
+                        if (scan != null)
+                        {
+                            context.Scans.Remove(scan);
+                            context.SaveChanges();
+                        }
+                        else
+                        {
+                            return Json("Błąd wewnętrzny systemu");
+                        }
+                    }
+
+                }
+                return Json("Success");
+            }
+            catch
+            {
+                return Json("Błąd wewnętrzny systemu");
+            }
+        }
     }
 }
