@@ -13,7 +13,7 @@
 
 <table class="table" style="margin-bottom:0px;">
     <tr>
-        <th class="col-md-1">ID</th>
+        <th class="col-md-1">Nr</th>
         <th class="col-md-8">Data i godzina</th>
         <th class="col-md-2">Status</th>
         <th class="col-md-1"></th>
@@ -36,7 +36,7 @@
 <script type="text/javascript">
     function DeleteScan(btn, scanID, devID) {
         var row = btn.parentNode.parentNode;
-        $.post("DeleteScan", { ID: id })
+        $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
                 if (response == "Success") {
                     //TODO

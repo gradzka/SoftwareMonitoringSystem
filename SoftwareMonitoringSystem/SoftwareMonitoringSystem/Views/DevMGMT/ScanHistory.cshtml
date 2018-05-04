@@ -13,20 +13,22 @@
 
 @{
     int counter = 1;
+    int collapseCounter = 1;
     foreach (KeyValuePair<DateTime, List<SoftwareMonitoringSystem.Models.D_S_IDDescStatus>> item in Model)
     {
+        counter = 1;
         <div class="panel-group">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                        <a data-toggle="collapse" href="@("#collapse" + counter)">@Convert.ToString(string.Format("{0:dd.MM.yyyy}", item.Key))</a>
+                        <a data-toggle="collapse" href="@("#collapse" + collapseCounter)">@Convert.ToString(string.Format("{0:dd.MM.yyyy}", item.Key))</a>
                     </h4>
                 </div>
-                <div id="@("collapse" + counter)" class="panel-collapse collapse">
+                <div id="@("collapse" + collapseCounter)" class="panel-collapse collapse">
                     <div class="panel-body" style="overflow:auto">
                         <table class="table" style="margin-bottom:0px;">
                             <tr>
-                                <th class="col-md-1">ID</th>
+                                <th class="col-md-1">Nr</th>
                                 <th class="col-md-8">Urządzenie</th>
                                 <th class="col-md-2">Status</th>
                                 <th class="col-md-1"></th>
@@ -46,13 +48,14 @@
                 </div>
             </div>
         </div>
+        collapseCounter++;
     }
 }
 
 <script type="text/javascript">
     function DeleteScan(btn, scanID, devID) {
         var row = btn.parentNode.parentNode;
-        $.post("DeleteScan", { ID: id })
+        $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
                 if (response == "Success") {
                     //TODO
