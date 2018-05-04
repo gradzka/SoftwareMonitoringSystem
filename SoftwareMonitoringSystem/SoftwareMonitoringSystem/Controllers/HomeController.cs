@@ -37,9 +37,34 @@ namespace SoftwareMonitoringSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (authProvider.Authenticate(loginData))
+                int result = authProvider.Authenticate(loginData);
+                switch(result)
                 {
-                    return RedirectToAction("Index", "Home");
+                    case -2:
+                        {
+                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            break;
+                        }
+                    case -1:
+                        {
+                            TempData["LogInAlert"] = "Błędne dane logowania";
+                            break;
+                        }
+                    case 0:
+                        {
+                            TempData["LogInAlert"] = "Konto zablokowane czasowo";
+                            break;
+                        }
+                    case 1:
+                        {
+                            TempData["LogInAlert"] = "";
+                            break;
+                        }
+                    default:
+                        {
+                            TempData["LogInAlert"] = "Błąd wewnętrzny systemu";
+                            break;
+                        }
                 }
             }
             return RedirectToAction("Index", "Home");

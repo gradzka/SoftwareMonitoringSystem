@@ -10,7 +10,7 @@ namespace SoftwareMonitoringSystem.Infrastructure.Abstract
 {
     public interface IAuthProvider
     {
-        bool Authenticate(Login loginData);
+        int Authenticate(Login loginData);
         void CheckDefaultPassword(Controller controller);
     }
 }

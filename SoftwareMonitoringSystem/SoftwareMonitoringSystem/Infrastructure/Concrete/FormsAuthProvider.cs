@@ -14,18 +14,18 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
 {
     public class FormsAuthProvider : IAuthProvider
     {
-        public bool Authenticate(Login loginData)
+        public int Authenticate(Login loginData)
         {
-            bool result = ValidateUser(loginData);
-            if (result)
+            int result = ValidateUser(loginData);
+            if (result == 1)
             {
                 FormsAuthentication.SetAuthCookie(loginData.login, false);
             }
             return result;
         }
-        public bool ValidateUser(Login loginData)
+        public int ValidateUser(Login loginData)
         {
-            bool result = false;
+            int result = -1;
             using (var dbContext = new SMSDBContext())
             {
                 DateTime now = DateTime.Now;
@@ -48,25 +48,49 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
                                     {
                                         loginCounter = 0;
                                     }
+                                    else
+                                    {
+                                        result = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    result = -2;
                                 }
                             }
-                            else if (loginCounter<3)
+                            else if (loginCounter < 3)
                             {
-                                    string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(loginData.password))).Replace("-", string.Empty);
-                                    string pAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(pAbbrev + editdate))).Replace("-", string.Empty);
-                                    if (admin != null)
+                                string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(loginData.password))).Replace("-", string.Empty);
+                                string pAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(pAbbrev + editdate))).Replace("-", string.Empty);
+                                if (admin != null)
+                                {
+                                    if (admin.Password.Equals(pAbbrevDate))
                                     {
-                                        if (admin.Password.Equals(pAbbrevDate))
-                                        {
-                                            result = true;
-                                        }
+                                        result = 1;
                                     }
+                                    else
+                                    {
+                                        result = -1;
+                                    }
+                                }
+                                else
+                                {
+                                    result = -2;
                                 }
                             }
                         }
+                        else
+                        {
+                            result = -2;
+                        }
                     }
+                }
+                else
+                {
+                    result = -1;
+                }
                 admin.LastLogInAttemptDate = now;
-                if (result == true)
+                if (result == 1)
                 {
                     admin.LogInAttemptCounter = 0;
                 }
