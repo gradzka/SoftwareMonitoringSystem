@@ -102,7 +102,7 @@
             $(function () {
                 var state = '@Session["ChangePassword"]';
                
-                if (state) {
+                if (state=='True') {
                     $("#alertChangePass").show();
                     $("#changePassModal").modal();
                 }

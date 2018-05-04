@@ -360,10 +360,23 @@
 
                 $.post('@Url.Action("Edit", "DevMGMT")', dataToPost)
                     .done(function (response, status, jqxhr) {
-                        if (response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz prawidłowy adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz prawidłowy adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
+                        if (response == "Success") {
                             $("#alertErrorEditDevice").hide();
                             $("#alertSuccessEditDevice").show();
-                            //podmień w wierszu
+
+                            var table = document.getElementById("DeviceTable");
+                            var length = table.children[0].children.length
+                            var modalForm = document.getElementById("editModal").children[0].children[0].children[0].children[2];
+                            for (index = 3; index < length; index++) {
+                                row = table.children[0].rows[index];
+                                if (row.cells[1].textContent == modalForm.children[2].value) {
+                                    row.cells[2].textContent = modalForm.children[3].children[0].value;
+                                    row.cells[3].textContent = modalForm.children[4].children[0].value;
+                                    row.cells[4].textContent = modalForm.children[5].children[0].value;
+                                    row.cells[5].textContent = modalForm.children[6].children[0].value;
+                                    break;
+                                }
+                            }
                         }
                         else {
                             $("#alertErrorEditDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
