@@ -23,7 +23,7 @@
         foreach (SoftwareMonitoringSystem.Models.D_S_IDDateStatus item in Model)
         {
             <tr>
-                <td class="col-md-1">@counter</td>          
+                <td class="col-md-1">@counter</td>
                 <td class="col-md-8">@Html.ActionLink(@Convert.ToString(string.Format("{0:dd.MM.yyyy, HH:mm:ss}", item.DateTime)), "DevScanDetails", new { ScanID = item.ScanID, DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do szczegółów skanowania urządzenia" })</td>
                 <td class="col-md-2">@item.Status</td>
                 <td class="col-md-1" align="center"><input type="button" title="Usuń skanowanie" value="Usuń" class="btn btn-danger" onclick="DeleteScan(this, @item.ScanID, @item.DeviceID)"></td>
@@ -38,15 +38,20 @@
         var row = btn.parentNode.parentNode;
         $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
-                if (response == "Success") {
-                    row.parentNode.parentNode.deleteRow(row.rowIndex);
-                    $("#alertError").hide();
+                var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                if (contentType == "application/json") {
+                    if (response == "Success") {
+                        row.parentNode.parentNode.deleteRow(row.rowIndex);
+                        $("#alertError").hide();
+                    }
+                    else {
+                        $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
+                        $("#alertError").show();
+                    }
                 }
                 else {
-                    $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
-                    $("#alertError").show();
+                    document.location.href = "/";
                 }
-
             })
             .fail(function (jqxhr, status, error) {
                 $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";

@@ -57,21 +57,26 @@
         var row = btn.parentNode.parentNode;
         $.post("DeleteScan", { ScanID: scanID, DeviceID: devID })
             .done(function (response, status, jqxhr) {
-                if (response == "Success") {
-                    var number = row.parentNode.parentNode.rows.length;
-                    var panel = row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-                    row.parentNode.parentNode.deleteRow(row.rowIndex);
-                    if (number == 2) {  
-                        panel.parentNode.removeChild(panel);
-                    }
+                var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                if (contentType == "application/json") {
+                    if (response == "Success") {
+                        var number = row.parentNode.parentNode.rows.length;
+                        var panel = row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+                        row.parentNode.parentNode.deleteRow(row.rowIndex);
+                        if (number == 2) {
+                            panel.parentNode.removeChild(panel);
+                        }
 
-                    $("#alertError").hide();
+                        $("#alertError").hide();
+                    }
+                    else {
+                        $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
+                        $("#alertError").show();
+                    }
                 }
                 else {
-                    $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + response;
-                    $("#alertError").show();
+                    document.location.href = "/";
                 }
-
             })
             .fail(function (jqxhr, status, error) {
                 $("#alertError")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";

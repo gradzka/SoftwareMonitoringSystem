@@ -8,35 +8,26 @@
         <h2 style="margin:0px;">Zdefiniowane urządzenia z&nbspagentami</h2>
     </div>
     <div style="float:right;">
-        <button type="submit" title="Wyszukaj nowe urządzenia" class="btn btn-primary" style="float:right;">Wyszukaj urządzenia <span class="glyphicon glyphicon-search"></span></button>
+        <button title="Wyszukaj nowe urządzenia" class="btn btn-primary" style="float:right;" onclick="searchNewDevices()">Wyszukaj urządzenia <span class="glyphicon glyphicon-search"></span></button>
     </div>
 </div>
 
 <div id="alertErrorDevice" class="alert alert-danger" style="display:none">
     Error
 </div>
+<div id="alertSuccessDevice" class="alert alert-success" style="display:none">
+    Success
+</div>
 
 <table id="DeviceTable" class="table">
     <tr>
         <th></th>
-        <th>
-            ID
-        </th>
-        <th>
-            Adres MAC
-        </th>
-        <th>
-            Producent
-        </th>
-        <th>
-            Adres IP
-        </th>
-        <th>
-            Opis
-        </th>
-        <th>
-            Status
-        </th>
+        <th>ID</th>
+        <th>Adres MAC</th>
+        <th>Producent</th>
+        <th>Adres IP</th>
+        <th>Opis</th>
+        <th>Status</th>
         <th></th>
         <th></th>
     </tr>
@@ -94,11 +85,11 @@
             <td>
                 @if (item.IsActive == 1)
                 {
-                    <span class="btn btn-success" style = "margin-top: 3px; margin-bottom: 3px" >Aktywny</span>
+                    <span class="btn btn-success" style="margin-top: 3px; margin-bottom: 3px">Aktywny</span>
                 }
                 else
                 {
-                    <span class="btn btn-danger" style = "margin-top: 3px; margin-bottom: 3px" >Nieaktywny</span>
+                    <span class="btn btn-danger" style="margin-top: 3px; margin-bottom: 3px">Nieaktywny</span>
                 }
             </td>
             <td>
@@ -189,18 +180,25 @@
 
                 $.post("AddDevice", dataToPost)
                     .done(function (response, status, jqxhr) {
-                        if (response != "Uzupełnij pole Producent" && response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz poprawny adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz poprawny adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
-                            AddDevice(response);
-                            var table = document.getElementById("DeviceTable");
-                            table.rows[1].cells[2].children[0].value = "";
-                            table.rows[1].cells[3].children[0].value = "";
-                            table.rows[1].cells[4].children[0].value = "";
-                            table.rows[1].cells[5].children[0].value = "";
-                            $("#alertErrorDevice").hide();
+                        var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                        if (contentType == "application/json") {
+                            $("#alertSuccessDevice").hide();
+                            if (response != "Uzupełnij pole Producent" && response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz poprawny adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz poprawny adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
+                                AddDevice(response);
+                                var table = document.getElementById("DeviceTable");
+                                table.rows[1].cells[2].children[0].value = "";
+                                table.rows[1].cells[3].children[0].value = "";
+                                table.rows[1].cells[4].children[0].value = "";
+                                table.rows[1].cells[5].children[0].value = "";
+                                $("#alertErrorDevice").hide();
+                            }
+                            else {
+                                $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
+                                $("#alertErrorDevice").show();
+                            }
                         }
                         else {
-                            $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
-                            $("#alertErrorDevice").show();
+                            document.location.href = "/";
                         }
 
                     })
@@ -232,6 +230,9 @@
 
                 $.post("Delete", { IDs: IDs })
                     .done(function (response, status, jqxhr) {
+                        var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                        if (contentType == "application/json") {
+                        $("#alertSuccessDevice").hide();
                         if (response == "Success") {
                             for (var i = rowsToDelete.length - 1; i >= 0; i--) {
                                 table.deleteRow(rowsToDelete[i].rowIndex);
@@ -242,7 +243,10 @@
                             $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
                             $("#alertErrorDevice").show();
                         }
-
+                        }
+                        else {
+                            document.location.href = "/";
+                        }
                     })
                     .fail(function (jqxhr, status, error) {
                         $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
@@ -272,6 +276,9 @@
 
                 $.post("Scan", { IDs: IDs })
                     .done(function (response, status, jqxhr) {
+                        var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                        if (contentType == "application/json") {
+                        $("#alertSuccessDevice").hide();
                         if (response == "Success") {
                             for (var i = rowsToScan.length - 1; i >= 0; i--) {
                                 rowsToScan[i].cells[0].children[0].checked = false;
@@ -281,7 +288,10 @@
                         else {
                             console.log(response);
                         }
-
+                        }
+                        else {
+                            document.location.href = "/";
+                        }
                     })
                     .fail(function (jqxhr, status, error) {
                         console.log("ERROR");
@@ -301,7 +311,7 @@
                 row.cells[0].innerHTML = "<input id=\"LDev\" name=\"LDev\" value=\"true\" type=\"checkbox\"><input name=\"LDev\" value=\"false\" type=\"hidden\">";
                 row.cells[0].align = "center";
                 row.cells[1].innerHTML = response.DeviceID;
-                row.cells[2].innerHTML = "<a href=\"/DevMGMT/DevHistory/" + response.DeviceID + "\" style=\"color:#0d47a1;\" title=\"Przejdź do historii skanowań urządzenia\">" + response.MACAddress + "</a>";
+                row.cells[2].innerHTML = "<a href=\"/DevMGMT/DevHistory?DeviceID=" + response.DeviceID + "\" style=\"color:#0d47a1;\" title=\"Przejdź do historii skanowań urządzenia\">" + response.MACAddress + "</a>";
                 row.cells[3].innerHTML = response.Manufacturer;
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
@@ -313,7 +323,6 @@
         }
 
         function checkAll(checkbox) {
-
             var checkboxes = document.getElementsByName(checkbox.name);
             if (checkbox.checked) {
                 for (var i = 0; i < checkboxes.length; i++) {
@@ -325,7 +334,8 @@
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 for (var i = 0; i < checkboxes.length; i++) {
                     if (checkboxes[i].type == 'checkbox') {
                         if (checkboxes[i] != checkbox) {
@@ -360,6 +370,8 @@
 
                 $.post('@Url.Action("Edit", "DevMGMT")', dataToPost)
                     .done(function (response, status, jqxhr) {
+                        var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                        if (contentType == "application/json") {
                         if (response == "Success") {
                             $("#alertErrorEditDevice").hide();
                             $("#alertSuccessEditDevice").show();
@@ -370,7 +382,7 @@
                             for (index = 3; index < length; index++) {
                                 row = table.children[0].rows[index];
                                 if (row.cells[1].textContent == modalForm.children[2].value) {
-                                    row.cells[2].textContent = modalForm.children[3].children[0].value;
+                                    row.cells[2].innerHTML = "<a href=\"/DevMGMT/DevHistory?DeviceID=" + modalForm.children[2].value + "\" style=\"color:#0d47a1;\" title=\"Przejdź do historii skanowań urządzenia\">" + modalForm.children[3].children[0].value + "</a>";
                                     row.cells[3].textContent = modalForm.children[4].children[0].value;
                                     row.cells[4].textContent = modalForm.children[5].children[0].value;
                                     row.cells[5].textContent = modalForm.children[6].children[0].value;
@@ -382,6 +394,10 @@
                             $("#alertErrorEditDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
                             $("#alertErrorEditDevice").show();
                             $("#alertSuccessEditDevice").hide();
+                            }
+                        }
+                        else {
+                            document.location.href = "/";
                         }
                     })
                     .fail(function (jqxhr, status, error) {
@@ -389,6 +405,33 @@
                         $("#alertErrorEditDevice").show();
                         $("#alertSuccessEditDevice").hide();
                     })
+        })
+
+        function searchNewDevices() {
+            $("#alertSuccessDevice")[0].innerHTML = 'Uwaga! '.bold() + "znalezione nowe urządzenia zostaną wyświetlone za chwilę!";
+            $("#alertSuccessDevice").show();
+            $("#alertErrorDevice").hide();
+
+            $.get('@Url.Action("Search", "DevMGMT")')
+                .done(function (response, status, jqxhr) {
+                    var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                    if (contentType == "application/json") {
+                        if (response == "Success") {
+
+                        }
+                    else {
+                        $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
+                        $("#alertErrorDevice").show();
+                    }
+                    }
+                    else {
+                        document.location.href = "/";
+                    }
                 })
+                .fail(function (jqxhr, status, error) {
+                    $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                    $("#alertErrorDevice").show();
+                })
+        }
     </script>
 }
