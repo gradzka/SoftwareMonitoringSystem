@@ -82,7 +82,7 @@ namespace SoftwareMonitoringSystem
         public Device()
         {
             CreationDate = DateTime.Now;
-            IsActive = 0;
+            IsActive = 1;
             ScansAndDevices = new HashSet<ScanAndDevice>();
         }
 

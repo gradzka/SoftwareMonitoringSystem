@@ -9,6 +9,14 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Collections.Specialized;
+using System.Net.Sockets;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using System.Text;
+using System.Net.Http;
+using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
@@ -126,6 +134,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                     dev.Manufacturer = Manufacturer;
                                     dev.IPAddress = IPAddress;
                                     dev.Description = Description;
+                                    dev.IsActive = 1;
                                     dbContext.Entry(dev).State = EntityState.Modified;
                                     dbContext.SaveChanges();
                                     return Json("Success");
@@ -377,6 +386,203 @@ namespace SoftwareMonitoringSystem.Controllers
             {
                 return Json("Błąd wewnętrzny systemu");
             }
+        }
+        //https://stackoverflow.com/a/24814027
+        private static UnicastIPAddressInformation[] GetAllLocalIPv4(NetworkInterfaceType _type)
+        {
+            List<UnicastIPAddressInformation> ipList = new List<UnicastIPAddressInformation>();
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
+                {
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            ipList.Add(ip);
+                        }
+                    }
+                }
+            }
+            return ipList.ToArray();
+        }
+
+        private IPAddress GetNetworkAddress(IPAddress address, IPAddress subnetMask)
+        {
+            byte[] ipAdressBytes = address.GetAddressBytes();
+            byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
+
+            if (ipAdressBytes.Length != subnetMaskBytes.Length)
+                throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
+
+            byte[] broadcastAddress = new byte[ipAdressBytes.Length];
+            for (int i = 0; i < broadcastAddress.Length; i++)
+            {
+                broadcastAddress[i] = (byte)(ipAdressBytes[i] & (subnetMaskBytes[i]));
+            }
+            return new IPAddress(broadcastAddress);
+        }
+
+        private string GetNextIPAddress(string ipAddress)
+        {
+            //https://stackoverflow.com/a/36083042
+            byte[] addressBytes = IPAddress.Parse(ipAddress).GetAddressBytes().Reverse().ToArray();
+            uint ipAsUint = BitConverter.ToUInt32(addressBytes, 0);
+            var nextAddress = BitConverter.GetBytes(++ipAsUint);
+            return String.Join(".", nextAddress.Reverse());
+        }
+        private List<string> GetRangeOfIPAddress(string startIPAddress, int howManyAddresses)
+        {
+            List<string> ipAddresses = new List<string>();
+            for (int i = 0; i < howManyAddresses; i++)
+            {
+                ipAddresses.Add(startIPAddress);
+                startIPAddress = GetNextIPAddress(startIPAddress); 
+            }
+            return ipAddresses;
+        }
+        private async void CheckAvailability(List<string> rangeOfIPAddresses, int startIndex, int stopIndex, Dictionary<string, JObject> IPAddressAndDevice)
+        {
+            HttpClient client = new HttpClient();
+            client.Timeout = new System.TimeSpan(0,0,1);
+            for (int i = stopIndex-1; i >= startIndex; i--)
+            {
+                try
+                {
+                    string URL = "http://" + rangeOfIPAddresses[i] +":11050/available";
+                    HttpResponseMessage response = client.GetAsync(URL).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        JObject parsedContent = JObject.Parse(content.ToString());
+                        IPAddressAndDevice.Add(rangeOfIPAddresses[i], parsedContent);
+                    }
+                    else
+                    {
+                        rangeOfIPAddresses[i] = "";
+                    }
+                }
+                catch(Exception e)
+                {
+                    rangeOfIPAddresses[i] = "";
+                }
+            }
+            client.Dispose();
+        }
+        [HttpGet]
+        public  ActionResult SearchDevices()
+        {
+            authProvider.CheckDefaultPassword(this);
+
+            UnicastIPAddressInformation unicastIPAddressInformationEthernet = GetAllLocalIPv4(NetworkInterfaceType.Ethernet).FirstOrDefault();
+            IPAddress networkAddressEthernet;
+            networkAddressEthernet = unicastIPAddressInformationEthernet != null ? GetNetworkAddress(unicastIPAddressInformationEthernet.Address, unicastIPAddressInformationEthernet.IPv4Mask) : null;
+            List<string> rangeOfIPAddresses = new List<string>();
+            if (networkAddressEthernet != null)
+            {
+                int networkDevicesNoE = -1;
+                networkDevicesNoE = Convert.ToInt32(Math.Pow(2, 32 - unicastIPAddressInformationEthernet.PrefixLength)) - 2;
+                rangeOfIPAddresses = GetRangeOfIPAddress(GetNextIPAddress(networkAddressEthernet.ToString()), networkDevicesNoE);
+            }
+            else
+            {
+                UnicastIPAddressInformation unicastIPAddressInformationWireless = GetAllLocalIPv4(NetworkInterfaceType.Wireless80211).FirstOrDefault();
+                IPAddress networkAddressWireless;
+                networkAddressWireless = unicastIPAddressInformationWireless != null ? GetNetworkAddress(unicastIPAddressInformationWireless.Address, unicastIPAddressInformationWireless.IPv4Mask) : null;
+                if (networkAddressWireless != null)
+                {
+                    int networkDevicesNoW = -1;
+                    networkDevicesNoW = Convert.ToInt32(Math.Pow(2, 32 - unicastIPAddressInformationWireless.PrefixLength)) - 2;
+                    rangeOfIPAddresses = GetRangeOfIPAddress(GetNextIPAddress(networkAddressWireless.ToString()), networkDevicesNoW);
+                }
+            }
+            if (rangeOfIPAddresses.Count > 0)
+            {
+                List<Thread> threads = new List<Thread>();
+                Dictionary<string, JObject> IPAddressAndDevice = new Dictionary<string, JObject>();
+                int threadNo = 8;
+                for (int i = 0; i < threadNo; i++)
+                {
+                    int myFirst = 0;
+                    int myLast = 0;
+                    myFirst = ((i * rangeOfIPAddresses.Count) / threadNo);
+                    myLast = (((i + 1) * rangeOfIPAddresses.Count) / threadNo);
+                    threads.Add(new Thread(() => CheckAvailability(rangeOfIPAddresses, myFirst, myLast, IPAddressAndDevice)));
+                    threads[i].Name = "IPA_" + i;
+                    threads[i].Start();
+                }
+                for (int i = 0; i < threadNo; i++)
+                {
+                    threads[i].Join();
+                }
+                rangeOfIPAddresses.RemoveAll(x => x == "");
+
+                if (IPAddressAndDevice.Count() == rangeOfIPAddresses.Count())//Devices from local net
+                {
+                    using (var context = new SMSDBContext())
+                    {
+                        var devices = context.Devices; //devices from DB
+                        foreach (var pair in IPAddressAndDevice)//iterate throw dictionary with <Key: addressIP, Value: json>
+                        {
+                            string macTMP = pair.Value["mac"].ToString();
+                            var device = devices.Where(x=> x.MACAddress == macTMP).ToList();
+                            if (device.Count()==1)//Device is in DB
+                            {
+                                if (device[0].IPAddress == pair.Value["ipAddress"].ToString())
+                                {
+                                    //Set is Active to 1
+                                    device[0].IsActive = 1;
+                                    context.Entry(device[0]).State = EntityState.Modified;
+                                    
+                                }
+                                else
+                                {
+                                    //Check other -> if they ip addr is duplicate set is Active to 0
+                                    foreach (var dev in devices)
+                                    {
+                                        if (dev.IPAddress == pair.Value["ipAddress"].ToString())
+                                        {
+                                            dev.IsActive = 0;
+                                            context.Entry(dev).State = EntityState.Modified;
+                                        }
+                                    }
+                                    //Set IPAddr to pair.Value["ipAddress"]
+                                    //Set is Active to 1
+                                    device[0].IPAddress = pair.Value["ipAddress"].ToString();
+                                    device[0].IsActive = 1;
+                                    context.Entry(device[0]).State = EntityState.Modified;
+
+                                }
+                            }
+                            else if (device.Count() == 0)
+                            {
+                                //Check other -> if they ip addr is duplicate set is Active to 0
+                                foreach (var dev in devices)
+                                {
+                                    if (dev.IPAddress == pair.Value["ipAddress"].ToString())
+                                    {
+                                        dev.IsActive = 0;
+                                        context.Entry(dev).State = EntityState.Modified;
+                                    }
+                                }
+                                //Set IPAddr to pair.Value["ipAddress"]
+                                Device newDevice = new Device();
+                                //Set is Active to 1
+                                newDevice.IPAddress = pair.Value["ipAddress"].ToString();
+                                newDevice.MACAddress = pair.Value["mac"].ToString();
+                                newDevice.Manufacturer = "XYZ";
+                                context.Devices.Add(newDevice);
+                            }
+                            else
+                            {
+                                return Json("Error");
+                            }
+                            context.SaveChanges();
+                        }
+                    }
+                }
+            }
+            return Json("Success");
         }
     }
 }
