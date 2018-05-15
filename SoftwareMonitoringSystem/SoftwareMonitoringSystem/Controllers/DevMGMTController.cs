@@ -469,7 +469,7 @@ namespace SoftwareMonitoringSystem.Controllers
             }
             client.Dispose();
         }
-        [HttpGet]
+        [HttpPost]
         public  ActionResult SearchDevices()
         {
             authProvider.CheckDefaultPassword(this);
@@ -532,6 +532,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                 {
                                     //Set is Active to 1
                                     device[0].IsActive = 1;
+                                    device[0].LastEditDate = DateTime.Now;
                                     context.Entry(device[0]).State = EntityState.Modified;
                                     
                                 }
@@ -543,6 +544,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                         if (dev.IPAddress == pair.Value["ipAddress"].ToString())
                                         {
                                             dev.IsActive = 0;
+                                            dev.LastEditDate = DateTime.Now;
                                             context.Entry(dev).State = EntityState.Modified;
                                         }
                                     }
@@ -550,6 +552,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                     //Set is Active to 1
                                     device[0].IPAddress = pair.Value["ipAddress"].ToString();
                                     device[0].IsActive = 1;
+                                    device[0].LastEditDate = DateTime.Now;
                                     context.Entry(device[0]).State = EntityState.Modified;
 
                                 }
@@ -562,6 +565,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                     if (dev.IPAddress == pair.Value["ipAddress"].ToString())
                                     {
                                         dev.IsActive = 0;
+                                        dev.LastEditDate = DateTime.Now;
                                         context.Entry(dev).State = EntityState.Modified;
                                     }
                                 }
@@ -577,8 +581,8 @@ namespace SoftwareMonitoringSystem.Controllers
                             {
                                 return Json("Error");
                             }
-                            context.SaveChanges();
                         }
+                        context.SaveChanges();
                     }
                 }
             }
