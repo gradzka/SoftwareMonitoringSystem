@@ -269,13 +269,6 @@ namespace SoftwareMonitoringSystem.Controllers
             }
             return View(dict);
         }
-
-        [HttpPost]
-        public ActionResult Scan(List<int> IDs)
-        {
-            //TODO
-            return Json("Success");
-        }
         [HttpGet]
         public ActionResult DevHistory(int DeviceID)
         {
@@ -409,18 +402,25 @@ namespace SoftwareMonitoringSystem.Controllers
 
         private IPAddress GetNetworkAddress(IPAddress address, IPAddress subnetMask)
         {
-            byte[] ipAdressBytes = address.GetAddressBytes();
-            byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
-
-            if (ipAdressBytes.Length != subnetMaskBytes.Length)
-                throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
-
-            byte[] broadcastAddress = new byte[ipAdressBytes.Length];
-            for (int i = 0; i < broadcastAddress.Length; i++)
+            if (address != null && subnetMask != null)
             {
-                broadcastAddress[i] = (byte)(ipAdressBytes[i] & (subnetMaskBytes[i]));
+                byte[] ipAdressBytes = address.GetAddressBytes();
+                byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
+
+                if (ipAdressBytes.Length != subnetMaskBytes.Length)
+                    throw new ArgumentException("Lengths of IP address and subnet mask do not match.");
+
+                byte[] broadcastAddress = new byte[ipAdressBytes.Length];
+                for (int i = 0; i < broadcastAddress.Length; i++)
+                {
+                    broadcastAddress[i] = (byte)(ipAdressBytes[i] & (subnetMaskBytes[i]));
+                }
+                return new IPAddress(broadcastAddress);
             }
-            return new IPAddress(broadcastAddress);
+            else
+            {
+                return null;
+            }
         }
 
         private string GetNextIPAddress(string ipAddress)
@@ -443,34 +443,37 @@ namespace SoftwareMonitoringSystem.Controllers
         }
         private async void CheckAvailability(List<string> rangeOfIPAddresses, int startIndex, int stopIndex, Dictionary<string, JObject> IPAddressAndDevice)
         {
-            HttpClient client = new HttpClient();
-            client.Timeout = new System.TimeSpan(0,0,1);
-            for (int i = stopIndex-1; i >= startIndex; i--)
+            if (rangeOfIPAddresses != null && IPAddressAndDevice != null)
             {
-                try
+                HttpClient client = new HttpClient();
+                client.Timeout = new System.TimeSpan(0, 0, 1);
+                for (int i = stopIndex - 1; i >= startIndex; i--)
                 {
-                    string URL = "http://" + rangeOfIPAddresses[i] +":11050/available";
-                    HttpResponseMessage response = client.GetAsync(URL).Result;
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        var content = await response.Content.ReadAsStringAsync();
-                        JObject parsedContent = JObject.Parse(content.ToString());
-                        IPAddressAndDevice.Add(rangeOfIPAddresses[i], parsedContent);
+                        string URL = "http://" + rangeOfIPAddresses[i] + ":11050/available";
+                        HttpResponseMessage response = client.GetAsync(URL).Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            JObject parsedContent = JObject.Parse(content.ToString());
+                            IPAddressAndDevice.Add(rangeOfIPAddresses[i], parsedContent);
+                        }
+                        else
+                        {
+                            rangeOfIPAddresses[i] = "";
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
                         rangeOfIPAddresses[i] = "";
                     }
                 }
-                catch(Exception e)
-                {
-                    rangeOfIPAddresses[i] = "";
-                }
+                client.Dispose();
             }
-            client.Dispose();
         }
         [HttpPost]
-        public  ActionResult SearchDevices()
+        public ActionResult SearchDevices()
         {
             authProvider.CheckDefaultPassword(this);
 
@@ -583,6 +586,108 @@ namespace SoftwareMonitoringSystem.Controllers
                             }
                         }
                         context.SaveChanges();
+                    }
+                }
+            }
+            return Json("Success");
+        }
+        public async void ScanInstalledSoftware(List<Device> devices, int startIndex, int stopIndex, int scanID)
+        {
+            if (devices != null)
+            {
+                HttpClient client = new HttpClient();
+                client.Timeout = new System.TimeSpan(0, 2, 0);
+                using (var context = new SMSDBContext())
+                {
+                    for (int i = startIndex; i < stopIndex; i++)
+                    {
+                        // Save information about scan to DB - basic info.
+                        ScanAndDevice scanAndDevice = new ScanAndDevice();
+                        scanAndDevice.ScanID = scanID;
+                        scanAndDevice.DeviceID = devices[i].DeviceID;
+                        try
+                        {
+                            string URL = "http://" + devices[i].IPAddress + ":11050/installedSoftware";
+                            HttpResponseMessage response = client.GetAsync(URL).Result;
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var content = await response.Content.ReadAsStringAsync();
+                                JObject parsedContent = JObject.Parse(content.ToString());
+                                // Save information about scan to DB - is successful = true.
+                                string pathToFile = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans\\" + devices[i].MACAddress;
+                                System.IO.Directory.CreateDirectory(pathToFile);
+                                string date = DateTime.Now.ToString().Replace(':','-');
+                                pathToFile = pathToFile + "\\" + date + ".json";
+                                scanAndDevice.Path = pathToFile;
+                                scanAndDevice.IsSuccessful = 1;
+
+                                // Save result into /folder/file.
+                                System.IO.File.WriteAllText(pathToFile, content);
+                            }
+                            else
+                            {
+                                // Save information about scan to DB - is successful = false.
+                                scanAndDevice.Path = "";
+                                scanAndDevice.IsSuccessful = 0;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            // Save information about scan to DB - is successful = false.
+                            scanAndDevice.Path = "//";
+                            scanAndDevice.IsSuccessful = 0;
+                        }
+                        finally
+                        {
+                            context.ScansAndDevices.Add(scanAndDevice);
+                        }
+                    }
+                    context.SaveChanges();
+                }
+                client.Dispose();
+            }
+        }
+        [HttpPost]
+        public ActionResult Scan(List <int> DeviceIDs)
+        {
+            if (DeviceIDs != null)
+            {
+                if (DeviceIDs.Count() > 0)
+                {
+                    // Check if device is active.
+                    using (var context = new SMSDBContext())
+                    {
+                        System.IO.Directory.CreateDirectory(System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans");
+                        // Only devices with IDs from DeviceIDs.
+                        var devices = context.Devices.Where(x => DeviceIDs.Contains(x.DeviceID)).ToList();
+                        // Remove devices which are inactive.
+                        devices.RemoveAll(x => x.IsActive == 0);
+                        if (devices.Count() > 0)
+                        {
+                            //Check Availability.
+
+                            // Scan devices in threads.
+                            List<Thread> threads = new List<Thread>();
+                            int threadNo = 8;
+                            Scan scan = new Scan();
+                            context.Scans.Add(scan);
+                            context.SaveChanges();
+                            for (int i = 0; i < threadNo; i++)
+                            {
+                                int myFirst = 0;
+                                int myLast = 0;
+                                myFirst = ((i * devices.Count) / threadNo);
+                                myLast = (((i + 1) * devices.Count) / threadNo);
+                                //Threads scan special range.
+                                threads.Add(new Thread(() => ScanInstalledSoftware(devices, myFirst, myLast, scan.ScanID)));
+                                threads[i].Name = "IPA_" + i;
+                                threads[i].Start();
+                            }
+                            for (int i = 0; i < threadNo; i++)
+                            {
+                                threads[i].Join();
+                            }
+                        }
                     }
                 }
             }

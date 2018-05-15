@@ -68,6 +68,7 @@ namespace SoftwareMonitoringSystem
         public Scan()
         {
             ScansAndDevices = new HashSet<ScanAndDevice>();
+            ScanDateTime = DateTime.Now;
         }
 
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Autoincrement]
