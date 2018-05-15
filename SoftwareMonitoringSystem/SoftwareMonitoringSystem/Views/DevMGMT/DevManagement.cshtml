@@ -76,7 +76,14 @@
     @foreach (var item in Model)
     {
         <tr>
-            <td align="center">@Html.CheckBox("LDev", false)</td>
+            @if (item.IsActive == 1)
+            {
+                <td align="center">@Html.CheckBox("LDev", false)</td>
+            }
+            else
+            {
+                <td align="center">@Html.CheckBox("LDev", false, new { @disabled = "disabled" })</td>
+            }
             <td>@Html.DisplayFor(modelItem => item.DeviceID)</td>
             <td>@Html.ActionLink(item.MACAddress, "DevHistory", new { DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do historii skanowań urządzenia" })</td>
             <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
@@ -408,29 +415,35 @@
         })
 
         function searchNewDevices() {
-            $("#alertSuccessDevice")[0].innerHTML = 'Uwaga! '.bold() + "znalezione nowe urządzenia zostaną wyświetlone za chwilę!";
+            $("#alertSuccessDevice")[0].innerHTML = 'Uwaga! '.bold() + " Po zakończeniu wyszukiwania nowych urządzeń strona zostanie odświeżona automatycznie!";
             $("#alertSuccessDevice").show();
             $("#alertErrorDevice").hide();
 
-            $.get('@Url.Action("Search", "DevMGMT")')
+            //$.ajaxSetup({ timeout: 3600000 }); //in milliseconds
+
+            $.post('@Url.Action("SearchDevices", "DevMGMT")')
                 .done(function (response, status, jqxhr) {
                     var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
                     if (contentType == "application/json") {
                         if (response == "Success") {
-
+                            document.location.href = "/";
                         }
-                    else {
-                        $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + response;
-                        $("#alertErrorDevice").show();
-                    }
+                        else {
+                            $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                            $("#alertErrorDevice").show();
+                            $("#alertSuccessDevice").hide();
+                        }
                     }
                     else {
                         document.location.href = "/";
                     }
+                    //$.ajaxSetup({ timeout: 0 }); //in milliseco
                 })
                 .fail(function (jqxhr, status, error) {
                     $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
                     $("#alertErrorDevice").show();
+                    $("#alertSuccessDevice").hide();
+                    //$.ajaxSetup({ timeout: 0 }); //in milliseco
                 })
         }
     </script>
