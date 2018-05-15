@@ -281,28 +281,30 @@
                     }
                 }
 
-                $.post("Scan", { IDs: IDs })
-                    .done(function (response, status, jqxhr) {
-                        var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
-                        if (contentType == "application/json") {
-                        $("#alertSuccessDevice").hide();
-                        if (response == "Success") {
-                            for (var i = rowsToScan.length - 1; i >= 0; i--) {
-                                rowsToScan[i].cells[0].children[0].checked = false;
+                if (rowsToScan.length>0) {
+                    $.post("Scan", { DeviceIDs: IDs })
+                        .done(function (response, status, jqxhr) {
+                            var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
+                            if (contentType == "application/json") {
+                                $("#alertSuccessDevice").hide();
+                                if (response == "Success") {
+                                    for (var i = rowsToScan.length - 1; i >= 0; i--) {
+                                        rowsToScan[i].cells[0].children[0].checked = false;
 
+                                    }
+                                }
+                                else {
+                                    console.log(response);
+                                }
                             }
-                        }
-                        else {
-                            console.log(response);
-                        }
-                        }
-                        else {
-                            document.location.href = "/";
-                        }
-                    })
-                    .fail(function (jqxhr, status, error) {
-                        console.log("ERROR");
-                    })
+                            else {
+                                document.location.href = "/";
+                            }
+                        })
+                        .fail(function (jqxhr, status, error) {
+                            console.log("ERROR");
+                        })
+                }
             })
         })
 
