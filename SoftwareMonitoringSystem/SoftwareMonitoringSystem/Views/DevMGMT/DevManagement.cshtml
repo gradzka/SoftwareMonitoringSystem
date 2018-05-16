@@ -264,6 +264,10 @@
             $("#ScanDeviceForm").on('submit', function (e) {
                 e.preventDefault()
 
+                $("#alertSuccessDevice")[0].innerHTML = "Skanowanie urządzeń w toku. Po zakończeniu strona zostanie odświeżona automatycznie!";
+                $("#alertSuccessDevice").show();
+                $("#alertErrorDevice").hide();
+
                 var IDs = [];
                 var rowsToScan = [];
 
@@ -286,15 +290,13 @@
                         .done(function (response, status, jqxhr) {
                             var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
                             if (contentType == "application/json") {
-                                $("#alertSuccessDevice").hide();
                                 if (response == "Success") {
-                                    for (var i = rowsToScan.length - 1; i >= 0; i--) {
-                                        rowsToScan[i].cells[0].children[0].checked = false;
-
-                                    }
+                                    document.location.href = "/";
                                 }
                                 else {
-                                    console.log(response);
+                                    $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                                    $("#alertErrorDevice").show();
+                                    $("#alertSuccessDevice").hide();
                                 }
                             }
                             else {
@@ -302,7 +304,9 @@
                             }
                         })
                         .fail(function (jqxhr, status, error) {
-                            console.log("ERROR");
+                            $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
+                            $("#alertErrorDevice").show();
+                            $("#alertSuccessDevice").hide();
                         })
                 }
             })
@@ -324,7 +328,7 @@
                 row.cells[3].innerHTML = response.Manufacturer;
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
-                row.cells[6].innerHTML = "<span class=\"btn btn-danger\" style=\"margin-top: 3px; margin-bottom: 3px\">Nieaktywny</span>";
+                row.cells[6].innerHTML = "<span class=\"btn btn-success\" style=\"margin-top: 3px; margin-bottom: 3px\">Aktywny</span>";
                 row.cells[7].innerHTML = "<a href=\"#editModal\" role=\"button\" class=\"btn btn-primary\" style=\"margin-top: 3px; margin-bottom: 7px\" data-toggle=\"modal\" data-backdrop=\"static\" onclick=\"editClick(this)\">Edytuj</a>";
                 row.cells[8].innerHTML = "<input id=\"RDev\" name=\"RDev\" onchange=\"highlightRow(this)\" value=\"true\" type=\"checkbox\"><input name=\"RDev\" value=\"false\" type=\"hidden\">\n ";
                 row.cells[8].align = "center";
