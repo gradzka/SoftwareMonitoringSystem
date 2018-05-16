@@ -17,6 +17,7 @@ using System.Text;
 using System.Net.Http;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
@@ -334,15 +335,10 @@ namespace SoftwareMonitoringSystem.Controllers
             d_S_IDDateStatuses = d_S_IDDateStatuses.OrderByDescending(x => x.DateTime).ToList();
             return View(d_S_IDDateStatuses);
         }
-        [HttpGet]
-        public ActionResult DevScanDetails()
-        {
-            authProvider.CheckDefaultPassword(this);
-            return View();
-        }
         [HttpPost]
         public ActionResult DeleteScan(int ScanID, int DeviceID)
         {
+            authProvider.CheckDefaultPassword(this);
             try
             {
                 using (var context = new SMSDBContext())
@@ -492,7 +488,7 @@ namespace SoftwareMonitoringSystem.Controllers
                         }
                         else
                         {
-                            var dev = devicesDB.Single(x => x.IPAddress == devices[i].IPAddress);
+                            var dev = devicesDB.SingleOrDefault(x => x.IPAddress == devices[i].IPAddress);
                             if (dev!=null)
                             {
                                 dev.IsActive = 0;
@@ -504,7 +500,7 @@ namespace SoftwareMonitoringSystem.Controllers
                     }
                     catch (Exception e)
                     {
-                        var dev = devicesDB.Single(x => x.IPAddress == devices[i].IPAddress);
+                        var dev = devicesDB.SingleOrDefault(x => x.IPAddress == devices[i].IPAddress);
                         if (dev != null)
                         {
                             dev.IsActive = 0;
@@ -522,7 +518,6 @@ namespace SoftwareMonitoringSystem.Controllers
         public ActionResult SearchDevices()
         {
             authProvider.CheckDefaultPassword(this);
-
             UnicastIPAddressInformation unicastIPAddressInformationEthernet = GetAllLocalIPv4(NetworkInterfaceType.Ethernet).FirstOrDefault();
             IPAddress networkAddressEthernet;
             networkAddressEthernet = unicastIPAddressInformationEthernet != null ? GetNetworkAddress(unicastIPAddressInformationEthernet.Address, unicastIPAddressInformationEthernet.IPv4Mask) : null;
@@ -696,6 +691,7 @@ namespace SoftwareMonitoringSystem.Controllers
         [HttpPost]
         public ActionResult Scan(List <int> DeviceIDs)
         {
+            authProvider.CheckDefaultPassword(this);
             if (DeviceIDs != null)
             {
                 if (DeviceIDs.Count() > 0)
@@ -757,6 +753,42 @@ namespace SoftwareMonitoringSystem.Controllers
                 }
             }
             return Json("Success");
+        }
+        [HttpGet]
+        public ActionResult DevScanDetails(int ScanID, int DeviceID)
+        {
+            authProvider.CheckDefaultPassword(this);
+            DevScanDetails devScanDetails = null;
+            using (var context = new SMSDBContext())
+            {
+                Device device = context.Devices.SingleOrDefault(x => x.DeviceID == DeviceID);
+                if (device != null)
+                {
+                    Scan scan = context.Scans.SingleOrDefault(x => x.ScanID == ScanID);
+                    if (scan != null)
+                    {
+                        ScanAndDevice scanAndDevice = context.ScansAndDevices.SingleOrDefault(x => x.ScanID == ScanID && x.DeviceID == DeviceID);
+                        if (scanAndDevice!=null)
+                        {
+                            string pathToFile = scanAndDevice.Path;
+                            if (System.IO.File.Exists(pathToFile))
+                            {
+                                string fileContent = System.IO.File.ReadAllText(pathToFile);
+                                if (fileContent!="")
+                                {
+                                    JObject jObject = JsonConvert.DeserializeObject<JObject>(fileContent);
+                                    List<Software> software = jObject["softwareList"].ToObject<List<Software>>();
+                                    software.RemoveAll(x => x == null);
+                                    devScanDetails = jObject.ToObject<DevScanDetails>();
+                                    devScanDetails.Software = software;
+                                    TempData["DeviceID"] = DeviceID;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return View(devScanDetails);
         }
     }
 }

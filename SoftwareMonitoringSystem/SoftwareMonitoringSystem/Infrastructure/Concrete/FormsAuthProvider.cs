@@ -28,81 +28,84 @@ namespace SoftwareMonitoringSystem.Infrastructure.Concrete
             int result = -1;
             using (var dbContext = new SMSDBContext())
             {
-                DateTime now = DateTime.Now;
                 Admin admin = dbContext.Admins.SingleOrDefault();
-                int loginCounter = -1;
-                if (loginData.login != "" && loginData.password != "")
+                if (admin != null)
                 {
-                    using (var sha512 = SHA512.Create())
+                    DateTime now = DateTime.Now;
+                    int loginCounter = -1;
+                    if (loginData.login != "" && loginData.password != "")
                     {
-                        DateTime editdate = admin.LastEditDate;
-                        if (editdate != null)
+                        using (var sha512 = SHA512.Create())
                         {
-                            loginCounter = admin.LogInAttemptCounter;
-                            if (loginCounter >= 3)
+                            DateTime editdate = admin.LastEditDate;
+                            if (editdate != null)
                             {
-                                DateTime? lastLoginAttemptDate = admin.LastLogInAttemptDate;
-                                if (lastLoginAttemptDate != null)
+                                loginCounter = admin.LogInAttemptCounter;
+                                if (loginCounter >= 3)
                                 {
-                                    double substraction = DateTime.Now.Subtract(lastLoginAttemptDate.Value).TotalMinutes;
-                                    if (substraction > 15)
+                                    DateTime? lastLoginAttemptDate = admin.LastLogInAttemptDate;
+                                    if (lastLoginAttemptDate != null)
                                     {
-                                        loginCounter = 0;
+                                        double substraction = DateTime.Now.Subtract(lastLoginAttemptDate.Value).TotalMinutes;
+                                        if (substraction > 15)
+                                        {
+                                            loginCounter = 0;
+                                        }
+                                        else
+                                        {
+                                            result = 0;
+                                        }
                                     }
                                     else
                                     {
-                                        result = 0;
+                                        result = -2;
                                     }
                                 }
-                                else
+                                if (loginCounter < 3)
                                 {
-                                    result = -2;
-                                }
-                            }
-                            if (loginCounter < 3)
-                            {
-                                string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(loginData.password))).Replace("-", string.Empty);
-                                string pAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(pAbbrev + editdate))).Replace("-", string.Empty);
-                                if (admin != null)
-                                {
-                                    if (admin.Password.Equals(pAbbrevDate))
+                                    string pAbbrev = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(loginData.password))).Replace("-", string.Empty);
+                                    string pAbbrevDate = BitConverter.ToString(sha512.ComputeHash(Encoding.Default.GetBytes(pAbbrev + editdate))).Replace("-", string.Empty);
+                                    if (admin != null)
                                     {
-                                        result = 1;
+                                        if (admin.Password.Equals(pAbbrevDate))
+                                        {
+                                            result = 1;
+                                        }
+                                        else
+                                        {
+                                            result = -1;
+                                        }
                                     }
                                     else
                                     {
-                                        result = -1;
+                                        result = -2;
                                     }
                                 }
-                                else
-                                {
-                                    result = -2;
-                                }
                             }
-                        }
-                        else
-                        {
-                            result = -2;
+                            else
+                            {
+                                result = -2;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    result = -1;
-                }
-                admin.LastLogInAttemptDate = now;
-                if (result == 1)
-                {
-                    admin.LogInAttemptCounter = 0;
-                }
-                else
-                {
-                    if (loginCounter<3) loginCounter++;
-                    admin.LogInAttemptCounter = loginCounter;
-                }
+                    else
+                    {
+                        result = -1;
+                    }
+                    admin.LastLogInAttemptDate = now;
+                    if (result == 1)
+                    {
+                        admin.LogInAttemptCounter = 0;
+                    }
+                    else
+                    {
+                        if (loginCounter < 3) loginCounter++;
+                        admin.LogInAttemptCounter = loginCounter;
+                    }
 
-                dbContext.Entry(admin).State = EntityState.Modified;
-                dbContext.SaveChanges();
+                    dbContext.Entry(admin).State = EntityState.Modified;
+                    dbContext.SaveChanges();
+                }
                 return result;
             }
         }

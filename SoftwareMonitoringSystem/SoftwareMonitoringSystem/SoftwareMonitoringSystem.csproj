@@ -169,6 +169,7 @@
     </Compile>
     <Compile Include="Infrastructure\Abstract\IAuthProvider.cs" />
     <Compile Include="Infrastructure\Concrete\FormsAuthProvider.cs" />
+    <Compile Include="Models\DevScanDetails.cs" />
     <Compile Include="Models\D_S_IDDateStatus.cs" />
     <Compile Include="Models\D_S_IDDescStatus.cs" />
     <Compile Include="Models\Login.cs" />
