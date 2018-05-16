@@ -20,7 +20,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
-    //equire authorization for all actions on the controller
+    // Require authorization for all actions on the controller.
     [Authorize]
     public class DevMGMTController : Controller
     {
@@ -29,7 +29,7 @@ namespace SoftwareMonitoringSystem.Controllers
         {
             authProvider = new FormsAuthProvider();
         }
-        // GET: DevMGMT
+        // GET: DevMGMT.
         public ActionResult GetDevices()
         {
             authProvider.CheckDefaultPassword(this);
@@ -43,7 +43,7 @@ namespace SoftwareMonitoringSystem.Controllers
             return View("DevManagement", devices);
         }
 
-        // GET: DevMGMT/Details/5
+        // GET: DevMGMT/Details/5.
         public ActionResult Details(int id)
         {
             authProvider.CheckDefaultPassword(this);
@@ -51,7 +51,7 @@ namespace SoftwareMonitoringSystem.Controllers
         }
 
 
-        // POST: DevMGMT/Create
+        // POST: DevMGMT/Create.
         [HttpPost]
         public JsonResult AddDevice(string MACAddress, string Manufacturer, string IPAddress, string Description)
         {
@@ -159,7 +159,7 @@ namespace SoftwareMonitoringSystem.Controllers
             }
         }
 
-        // POST: DevMGMT/Delete/5
+        // POST: DevMGMT/Delete/5.
         [HttpPost]
         public ActionResult Delete(List<int> IDs)
         {
@@ -193,7 +193,7 @@ namespace SoftwareMonitoringSystem.Controllers
         public ActionResult ScanHistory()
         {
             authProvider.CheckDefaultPassword(this);
-            //dictionary: KEY: DateTime, Value: D_S_IDDescStatus
+            // Dictionary: KEY: DateTime, Value: D_S_IDDescStatus.
             Dictionary<DateTime, List<D_S_IDDescStatus>> dict = new Dictionary<DateTime, List<D_S_IDDescStatus>>();
             using (var context = new SMSDBContext())
             {
@@ -238,7 +238,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                                 D_S_IDDescStatus.Status = "Sukces";
                                             }
 
-                                            if (!dict.ContainsKey(scan.ScanDateTime))//key exists
+                                            if (!dict.ContainsKey(scan.ScanDateTime))// Key exists.
                                             {
                                                 dict.Add(scan.ScanDateTime, new List<D_S_IDDescStatus>());
                                             }
@@ -248,23 +248,23 @@ namespace SoftwareMonitoringSystem.Controllers
                                 }
                                 else
                                 {
-                                    //brak urzadzenia o podanym id
+                                    // No devices with this ID.
                                 }
                             }                         
                         }
                         else
                         {
-                            //lista urzadzen jest pusta
+                            // Empty devices ID.
                         }
                     }
                     else
                     {
-                        //lista scansAndDevices jest pusta
+                        // ScansAndDevices list is empty.
                     }
                 }
                 else
                 {
-                    //lista skanowan jest pusta
+                    // Scans list is empty.
                 }
             }
             return View(dict);
@@ -322,12 +322,12 @@ namespace SoftwareMonitoringSystem.Controllers
                         }
                         else
                         {
-                            //lista scans jest pusta
+                            // Scans list is empty.
                         }
                     }
                     else
                     {
-                        //lista scansAndDevices jest pusta
+                        // ScansAndDevices list is empty.
                     }
                 }
             }
@@ -380,7 +380,7 @@ namespace SoftwareMonitoringSystem.Controllers
                 return Json("Błąd wewnętrzny systemu");
             }
         }
-        //https://stackoverflow.com/a/24814027
+        // https://stackoverflow.com/a/24814027
         private static UnicastIPAddressInformation[] GetAllLocalIPv4(NetworkInterfaceType _type)
         {
             List<UnicastIPAddressInformation> ipList = new List<UnicastIPAddressInformation>();
@@ -425,7 +425,7 @@ namespace SoftwareMonitoringSystem.Controllers
 
         private string GetNextIPAddress(string ipAddress)
         {
-            //https://stackoverflow.com/a/36083042
+            // https://stackoverflow.com/a/36083042
             byte[] addressBytes = IPAddress.Parse(ipAddress).GetAddressBytes().Reverse().ToArray();
             uint ipAsUint = BitConverter.ToUInt32(addressBytes, 0);
             var nextAddress = BitConverter.GetBytes(++ipAsUint);
@@ -471,6 +471,52 @@ namespace SoftwareMonitoringSystem.Controllers
                 }
                 client.Dispose();
             }
+        }
+        private async void CheckAvailability(List<Device> devices, int startIndex, int stopIndex)
+        {
+            HttpClient client = new HttpClient();
+            client.Timeout = new System.TimeSpan(0, 0, 1);
+            using (var context = new SMSDBContext())
+            {
+                var devicesDB = context.Devices.Where(x => x.IsActive == 1).ToList();
+                for (int i = startIndex; i < stopIndex; i++)
+                {
+                    try
+                    {
+                        string URL = "http://" + devices[i].IPAddress + ":11050/available";
+                        HttpResponseMessage response = client.GetAsync(URL).Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            // JObject parsedContent = JObject.Parse(content.ToString());
+                        }
+                        else
+                        {
+                            var dev = devicesDB.Single(x => x.IPAddress == devices[i].IPAddress);
+                            if (dev!=null)
+                            {
+                                dev.IsActive = 0;
+                                dev.LastEditDate = DateTime.Now;
+                                context.Entry(dev).State = EntityState.Modified;
+                            }
+                            devices[i].IsActive = 0;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        var dev = devicesDB.Single(x => x.IPAddress == devices[i].IPAddress);
+                        if (dev != null)
+                        {
+                            dev.IsActive = 0;
+                            dev.LastEditDate = DateTime.Now;
+                            context.Entry(dev).State = EntityState.Modified;
+                        }
+                        devices[i].IsActive = 0;
+                    }
+                }
+                context.SaveChanges();
+            }
+            client.Dispose();
         }
         [HttpPost]
         public ActionResult SearchDevices()
@@ -520,20 +566,20 @@ namespace SoftwareMonitoringSystem.Controllers
                 }
                 rangeOfIPAddresses.RemoveAll(x => x == "");
 
-                if (IPAddressAndDevice.Count() == rangeOfIPAddresses.Count())//Devices from local net
+                if (IPAddressAndDevice.Count() == rangeOfIPAddresses.Count())// Devices from local net.
                 {
                     using (var context = new SMSDBContext())
                     {
-                        var devices = context.Devices; //devices from DB
-                        foreach (var pair in IPAddressAndDevice)//iterate throw dictionary with <Key: addressIP, Value: json>
+                        var devices = context.Devices; // Devices from DB.
+                        foreach (var pair in IPAddressAndDevice)// Iterate throw dictionary with <Key: addressIP, Value: json>.
                         {
                             string macTMP = pair.Value["mac"].ToString();
                             var device = devices.Where(x=> x.MACAddress == macTMP).ToList();
-                            if (device.Count()==1)//Device is in DB
+                            if (device.Count()==1) // Device is in DB.
                             {
                                 if (device[0].IPAddress == pair.Value["ipAddress"].ToString())
                                 {
-                                    //Set is Active to 1
+                                    // Set IsActive to 1.
                                     device[0].IsActive = 1;
                                     device[0].LastEditDate = DateTime.Now;
                                     context.Entry(device[0]).State = EntityState.Modified;
@@ -541,7 +587,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                 }
                                 else
                                 {
-                                    //Check other -> if they ip addr is duplicate set is Active to 0
+                                    // Check other -> if they ip addr is duplicate set IsActive to 0.
                                     foreach (var dev in devices)
                                     {
                                         if (dev.IPAddress == pair.Value["ipAddress"].ToString())
@@ -551,8 +597,8 @@ namespace SoftwareMonitoringSystem.Controllers
                                             context.Entry(dev).State = EntityState.Modified;
                                         }
                                     }
-                                    //Set IPAddr to pair.Value["ipAddress"]
-                                    //Set is Active to 1
+                                    // Set IPAddr to pair.Value["ipAddress"].
+                                    // Set IsActive to 1.
                                     device[0].IPAddress = pair.Value["ipAddress"].ToString();
                                     device[0].IsActive = 1;
                                     device[0].LastEditDate = DateTime.Now;
@@ -562,7 +608,7 @@ namespace SoftwareMonitoringSystem.Controllers
                             }
                             else if (device.Count() == 0)
                             {
-                                //Check other -> if they ip addr is duplicate set is Active to 0
+                                // Check other -> if they ip addr is duplicate set IsActive to 0.
                                 foreach (var dev in devices)
                                 {
                                     if (dev.IPAddress == pair.Value["ipAddress"].ToString())
@@ -572,9 +618,9 @@ namespace SoftwareMonitoringSystem.Controllers
                                         context.Entry(dev).State = EntityState.Modified;
                                     }
                                 }
-                                //Set IPAddr to pair.Value["ipAddress"]
+                                // Set IPAddr to pair.Value["ipAddress"]
                                 Device newDevice = new Device();
-                                //Set is Active to 1
+                                // Set IsActive to 1.
                                 newDevice.IPAddress = pair.Value["ipAddress"].ToString();
                                 newDevice.MACAddress = pair.Value["mac"].ToString();
                                 newDevice.Manufacturer = "XYZ";
@@ -664,28 +710,47 @@ namespace SoftwareMonitoringSystem.Controllers
                         devices.RemoveAll(x => x.IsActive == 0);
                         if (devices.Count() > 0)
                         {
-                            //Check Availability.
-
-                            // Scan devices in threads.
-                            List<Thread> threads = new List<Thread>();
+                            List<Thread> threadsA = new List<Thread>();
                             int threadNo = 8;
-                            Scan scan = new Scan();
-                            context.Scans.Add(scan);
-                            context.SaveChanges();
+                            // Check Availability => remove devices which dont't answer.
                             for (int i = 0; i < threadNo; i++)
                             {
                                 int myFirst = 0;
                                 int myLast = 0;
                                 myFirst = ((i * devices.Count) / threadNo);
                                 myLast = (((i + 1) * devices.Count) / threadNo);
-                                //Threads scan special range.
-                                threads.Add(new Thread(() => ScanInstalledSoftware(devices, myFirst, myLast, scan.ScanID)));
-                                threads[i].Name = "IPA_" + i;
-                                threads[i].Start();
+                                threadsA.Add(new Thread(() => CheckAvailability(devices, myFirst, myLast)));
+                                threadsA[i].Name = "IPA_A" + i;
+                                threadsA[i].Start();
                             }
                             for (int i = 0; i < threadNo; i++)
                             {
-                                threads[i].Join();
+                                threadsA[i].Join();
+                            }
+                            // Remove devices which are inactive.
+                            devices.RemoveAll(x => x.IsActive == 0);
+                            if (devices.Count() > 0)
+                            {
+                                List<Thread> threadsS = new List<Thread>();
+                                // Scan devices in threads.
+                                Scan scan = new Scan();
+                                context.Scans.Add(scan);
+                                context.SaveChanges();
+                                for (int i = 0; i < threadNo; i++)
+                                {
+                                    int myFirst = 0;
+                                    int myLast = 0;
+                                    myFirst = ((i * devices.Count) / threadNo);
+                                    myLast = (((i + 1) * devices.Count) / threadNo);
+                                    // Threads scan special range.
+                                    threadsS.Add(new Thread(() => ScanInstalledSoftware(devices, myFirst, myLast, scan.ScanID)));
+                                    threadsS[i].Name = "IPA_S" + i;
+                                    threadsS[i].Start();
+                                }
+                                for (int i = 0; i < threadNo; i++)
+                                {
+                                    threadsS[i].Join();
+                                }
                             }
                         }
                     }

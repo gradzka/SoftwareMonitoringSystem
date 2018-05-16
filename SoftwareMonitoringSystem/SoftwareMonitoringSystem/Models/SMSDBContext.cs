@@ -77,6 +77,10 @@ namespace SoftwareMonitoringSystem
         public DateTime ScanDateTime { get; set; }
         public virtual ICollection<ScanAndDevice> ScansAndDevices { get; set; }
     }
+    public interface ICloneable<T>
+    {
+        T Clone();
+    }
     [Table("Devices")]
     public class Device
     {
