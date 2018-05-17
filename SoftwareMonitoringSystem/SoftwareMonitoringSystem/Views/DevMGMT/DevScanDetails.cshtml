@@ -1,4 +1,4 @@
-﻿<!--model List<ScanAndDevice>-->
+﻿@model SoftwareMonitoringSystem.Models.DevScanDetails
 @{
     ViewBag.Title = "Szczegóły skanowania";
 }
@@ -9,45 +9,96 @@
     <hr />
     <table style="width: 100%">
         <tr>
-            <td align="right" style="width:49%; color: #cfcfcf">Nazwa urządzenia:</td>
+            <td align="right" style="width:49%; color: #616161">Adres MAC:</td>
             <td></td>
-            <td style="width: 49%"><!--Html.DisplayFor(model => model.)-->Work device</td>
+            <td style="width: 49%">@Model.Mac</td>
         </tr>
         <tr>
-            <td align="right" style="width:49%; color: #cfcfcf">Data i godzina skanowania:</td>
+            <td align="right" style="width:49%; color: #616161">Adres IP:</td>
             <td></td>
-            <td style="width: 49%"><!--Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.))-->04.04.18 09:44:12</td>
+            <td style="width: 49%">@Model.IPAddress</td>
         </tr>
         <tr>
-            <td align="right" style="width:49%; color: #cfcfcf">Status:</td>
+            <td align="right" style="width:49%; color: #616161">Manufacturer:</td>
             <td></td>
-            <td style="width: 49%"><!--Html.DisplayFor(model => model.)-->Powodzenie</td>
+            <td style="width: 49%">@Model.Manufacturer</td>
         </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #616161">Nazwa urządzenia:</td>
+            <td></td>
+            <td style="width: 49%">@TempData["Description"]</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #616161">Data i godzina skanowania:</td>
+            <td></td>
+            <td style="width: 49%">@Convert.ToString(string.Format("{0:dd/MM/yyyy HH:mm:ss}", TempData["ScanDateTime"]))</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #616161">Status:</td>
+            <td></td>
+            <td style="width: 49%">@TempData["IsSuccessful"]</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #616161">Zainstalowany system operacyjny:</td>
+            <td></td>
+            <td style="width: 49%">@Model.System</td>
+        </tr>
+        <tr>
+            <td align="right" style="width:49%; color: #616161">Liczba rozpoznanych programów:</td>
+            <td></td>
+            <td style="width: 49%">@Model.RecognizedSoftware</td>
+        </tr>
+
     </table>
 </div>
 
 <br />
 
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">
-                <a data-toggle="collapse" href="#collapse1">Visual Studio 2017</a>
-            </h4>
-        </div>
-        <div id="collapse1" class="panel-collapse collapse">
-            <div class="panel-body" style="overflow:auto">
-                <div><b>Wersja: </b>15.6.7</div>
-                <div><b>Klucz produktu: </b>XXXXX-XXXXX-XXXXX</div>   
+@{
+    int collapseCounter = 0;
+    foreach (var software in Model.Software)
+    {
+        collapseCounter++;
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="@("#collapse" + collapseCounter)">@software.Name</a>
+                    </h4>
+                </div>
+                <div id="@("collapse" + collapseCounter)" class="panel-collapse collapse">
+                    <div class="panel-body" style="overflow:auto">
+                        @if (software.Version != "")
+                        {
+                            <div><b>Wersja: </b>@software.Version</div>
+                        }
+                        @if (software.Publisher != "")
+                        {
+                            <div><b>Producent: </b>@software.Publisher</div>
+                        }
+                        @if (software.LocationPath != "")
+                        {
+                            <div><b>Ścieżka instalacji: </b>@software.LocationPath</div>
+                        }
+                        @if (software.InstallDate != "")
+                        {
+                            <div><b>Data instalacji: </b>@((software.InstallDate.Contains('-') && software.InstallDate.Length==8) ? software.InstallDate : software.InstallDate.Insert(4, "-").Insert(7, "-"))</div>
+                        }
+                        @if (software.Description != "")
+                        {
+                            <div><b>Opis: </b>@software.Description</div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    }
+}
 
 <br />
 
 <p>
-    @Html.ActionLink("Powrót do skanowań tego urządzenia", "DevHistory", new { DeviceID = "TODO" })
+    @Html.ActionLink("Powrót do skanowań tego urządzenia", "DevHistory", new { DeviceID = TempData["DeviceID"] })
 </p>
 <p>
     @Html.ActionLink("Powrót do skanowań wszystkich urządzeń", "ScanHistory")
