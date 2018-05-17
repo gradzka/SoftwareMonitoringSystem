@@ -782,6 +782,9 @@ namespace SoftwareMonitoringSystem.Controllers
                                     devScanDetails = jObject.ToObject<DevScanDetails>();
                                     devScanDetails.Software = software;
                                     TempData["DeviceID"] = DeviceID;
+                                    TempData["Description"] = device.Description;
+                                    TempData["ScanDateTime"] = scan.ScanDateTime;
+                                    TempData["IsSuccessful"] = scanAndDevice.IsSuccessful;
                                 }
                             }
                         }
