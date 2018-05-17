@@ -13,7 +13,7 @@ namespace SoftwareMonitoringSystem.Models
         public string Version { get; set; }
         public string LocationPath { get; set; }
         public string Publisher { get; set; }
-        public string InstallationDate { get; set; }
+        public string InstallDate { get; set; }
         public string Description { get; set; }
     }
 

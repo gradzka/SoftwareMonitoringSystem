@@ -779,6 +779,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                     JObject jObject = JsonConvert.DeserializeObject<JObject>(fileContent);
                                     List<Software> software = jObject["softwareList"].ToObject<List<Software>>();
                                     software.RemoveAll(x => x == null);
+                                    software = software.OrderBy(x => x.Name).ToList();
                                     devScanDetails = jObject.ToObject<DevScanDetails>();
                                     devScanDetails.Software = software;
                                     TempData["DeviceID"] = DeviceID;
