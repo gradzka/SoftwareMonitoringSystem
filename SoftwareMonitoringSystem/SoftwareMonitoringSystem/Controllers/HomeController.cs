@@ -248,7 +248,18 @@ namespace SoftwareMonitoringSystem.Controllers
                             context.Settings.Add(new Setting());
                             context.SaveChanges();
                             //******
+                            try
+                            {
+                                string path = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans";
+                                if (Directory.Exists(path))
+                                {
+                                    Directory.Delete(path, true);
+                                }
+                            }
+                            catch (Exception e)
+                            {
 
+                            }
                         }
                         else
                         {
