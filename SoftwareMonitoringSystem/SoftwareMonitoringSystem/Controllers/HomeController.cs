@@ -18,6 +18,12 @@ namespace SoftwareMonitoringSystem.Controllers
     public class HomeController : Controller
     {
         IAuthProvider authProvider;
+
+        public ActionResult Error()
+        {
+            return View();
+        }
+
         public HomeController()
         {
             authProvider = new FormsAuthProvider();

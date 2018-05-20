@@ -1,13 +1,20 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Error</title>
-</head>
-<body>
-    <hgroup>
-        <h1>Error.</h1>
-        <h2>An error occurred while processing your request.</h2>
-    </hgroup>
-</body>
-</html>
+﻿<style>
+    body {
+        background-image: url(../Images/Error.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+
+@{
+    ViewBag.Title = "Błąd";
+}
+
+<div style="height: 170px;">
+    <div style=" padding:20px;">
+        <h3 style="color:#9a1111"><b>Błąd aplikacji</b></h3>
+        <h4>Podczas przetwarzania zapytania wystąpił błąd.</h4>
+        <br />
+        @Html.ActionLink("Przejdź do strony głównej", "Index", "Home")
+    </div>
+</div>

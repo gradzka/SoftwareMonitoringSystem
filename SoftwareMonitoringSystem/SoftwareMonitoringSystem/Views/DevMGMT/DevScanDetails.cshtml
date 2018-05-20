@@ -4,6 +4,8 @@
 }
 
 <h2>Szczegóły skanowania</h2>
+@if (Model != null)
+{
 
 <div>
     <hr />
@@ -54,7 +56,6 @@
 
 <br />
 
-@{
     int collapseCounter = 0;
     foreach (var software in Model.Software)
     {
@@ -82,7 +83,7 @@
                         }
                         @if (software.InstallDate != "")
                         {
-                            <div><b>Data instalacji: </b>@((software.InstallDate.Contains('-') && software.InstallDate.Length==8) ? software.InstallDate : software.InstallDate.Insert(4, "-").Insert(7, "-"))</div>
+                            <div><b>Data instalacji: </b>@((software.InstallDate.Contains('-') && software.InstallDate.Length == 8) ? software.InstallDate : software.InstallDate.Insert(4, "-").Insert(7, "-"))</div>
                         }
                         @if (software.Description != "")
                         {
@@ -93,13 +94,15 @@
             </div>
         </div>
     }
-}
+
 
 <br />
 
 <p>
     @Html.ActionLink("Powrót do skanowań tego urządzenia", "DevHistory", new { DeviceID = TempData["DeviceID"] })
 </p>
+
+    }
 <p>
     @Html.ActionLink("Powrót do skanowań wszystkich urządzeń", "ScanHistory")
 </p>
