@@ -38,7 +38,10 @@
         <tr>
             <td align="right" style="width:49%; color: #616161">Status:</td>
             <td></td>
-            <td style="width: 49%">@TempData["IsSuccessful"]</td>
+            @{ 
+                if (Int32.Parse(TempData["IsSuccessful"].ToString()) == 1) { <td style="width: 49%">Sukces</td>}
+                else { <td style="width: 49%">Niepowodzenie</td> } 
+            }
         </tr>
         <tr>
             <td align="right" style="width:49%; color: #616161">Zainstalowany system operacyjny:</td>
