@@ -668,7 +668,7 @@ namespace SoftwareMonitoringSystem.Controllers
                             else
                             {
                                 // Save information about scan to DB - is successful = false.
-                                scanAndDevice.Path = "";
+                                scanAndDevice.Path = "//";
                                 scanAndDevice.IsSuccessful = 0;
                             }
                         }
@@ -723,15 +723,28 @@ namespace SoftwareMonitoringSystem.Controllers
                             {
                                 threadsA[i].Join();
                             }
+                            // Scan devices in threads.
+                            Scan scan = new Scan();
+                            context.Scans.Add(scan);
+                            context.SaveChanges();
+                            foreach (var item in devices)
+                            {
+                                if (item.IsActive == 0)
+                                {
+                                    ScanAndDevice scanAndDevice = new ScanAndDevice();
+                                    scanAndDevice.ScanID = scan.ScanID;
+                                    scanAndDevice.DeviceID = item.DeviceID;
+                                    scanAndDevice.Path = "//";
+                                    scanAndDevice.IsSuccessful = 0;
+                                    context.ScansAndDevices.Add(scanAndDevice);
+                                }
+                            }
+                            context.SaveChanges();
                             // Remove devices which are inactive.
                             devices.RemoveAll(x => x.IsActive == 0);
                             if (devices.Count() > 0)
                             {
                                 List<Thread> threadsS = new List<Thread>();
-                                // Scan devices in threads.
-                                Scan scan = new Scan();
-                                context.Scans.Add(scan);
-                                context.SaveChanges();
                                 for (int i = 0; i < threadNo; i++)
                                 {
                                     int myFirst = 0;
