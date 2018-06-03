@@ -96,7 +96,7 @@ namespace SoftwareMonitoringSystem
         [MinLength(17), MaxLength(17), Required]
         public string MACAddress { get; set; }
         [MaxLength(64)]
-        public string Manufacturer { get; set; }
+        public string Model { get; set; }
         [MaxLength(45)]
         public string IPAddress { get; set; }
         public string Description { get; set; }

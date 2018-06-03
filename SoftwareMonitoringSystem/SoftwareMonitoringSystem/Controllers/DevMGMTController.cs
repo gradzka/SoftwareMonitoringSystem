@@ -18,6 +18,7 @@ using System.Net.Http;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace SoftwareMonitoringSystem.Controllers
 {
@@ -54,13 +55,13 @@ namespace SoftwareMonitoringSystem.Controllers
 
         // POST: DevMGMT/Create.
         [HttpPost]
-        public JsonResult AddDevice(string MACAddress, string Manufacturer, string IPAddress, string Description)
+        public JsonResult AddDevice(string MACAddress, string _Model, string IPAddress, string Description)
         {
             try
             {
-                if (Manufacturer == "")
+                if (_Model == "")
                 {
-                    return Json("Uzupełnij pole Producent");
+                    return Json("Uzupełnij pole Model");
                 }
                 using (var dbContext = new SMSDBContext())
                 {
@@ -91,7 +92,7 @@ namespace SoftwareMonitoringSystem.Controllers
 
                     Device device = new Device();
                     device.MACAddress = MACAddress;
-                    device.Manufacturer = Manufacturer;
+                    device.Model = _Model;
                     device.IPAddress = IPAddress;
                     device.Description = Description;
                     dbContext.Devices.Add(device);
@@ -106,9 +107,9 @@ namespace SoftwareMonitoringSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(int DeviceID, string MACAddress, string Manufacturer, string IPAddress, string Description)
+        public ActionResult Edit(int DeviceID, string MACAddress, string Model, string IPAddress, string Description)
         {
-            if (DeviceID > 0 && MACAddress != "" && Manufacturer != "" && IPAddress != "")
+            if (DeviceID > 0 && MACAddress != "" && Model != "" && IPAddress != "")
             {
                 Regex MACAddr = new Regex(@"^[a-fA-F0-9-]{17}|[a-fA-F0-9:]{17}$");
                 Regex IPv4Addr = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]{1,5})?$");
@@ -132,7 +133,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                 {
                                     Device dev = dbContext.Devices.SingleOrDefault(x => x.DeviceID.Equals(DeviceID));
                                     dev.MACAddress = MACAddress;
-                                    dev.Manufacturer = Manufacturer;
+                                    dev.Model = Model;
                                     dev.IPAddress = IPAddress;
                                     dev.Description = Description;
                                     dev.IsActive = 1;
@@ -169,12 +170,51 @@ namespace SoftwareMonitoringSystem.Controllers
                 using (var dbContext = new SMSDBContext())
                 {
                     Device device;
-                    foreach (var item in IDs)
+                    foreach (int item in IDs)
                     {
+                        var scansAndDevices = dbContext.ScansAndDevices.Where(x => x.DeviceID == item);
+                        // Remove from ScansAndDevices.
+                        foreach (var sd2 in scansAndDevices)
+                        {
+                            if (sd2 != null)
+                            {
+                                dbContext.ScansAndDevices.Remove(sd2);
+                            }
+                        }
+                        // Remove from Scans.
+                        var sc_and_dev = dbContext.ScansAndDevices;
+                        foreach (var sd1 in scansAndDevices)
+                        {
+                            if (sd1 != null)
+                            {
+                                var sc_c = dbContext.Scans.Where(x => x.ScanID == sd1.ScanID).FirstOrDefault();
+                                if (sc_c!=null)
+                                {
+                                    if (sc_and_dev.Select(x=>x.ScanID == sd1.ScanID).Count()==0)
+                                    {
+                                        dbContext.Scans.Remove(sc_c);
+                                    }
+                                }
+                            }
+                        }
+
                         device = dbContext.Devices.SingleOrDefault(dev => dev.DeviceID == item);
                         if (device != null)
                         {
                             dbContext.Devices.Remove(device);
+                            //******
+                            try
+                            {
+                                string path = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans\\" + device.MACAddress;
+                                if (Directory.Exists(path))
+                                {
+                                    Directory.Delete(path, true);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
                         }
                         else
                         {
@@ -359,8 +399,30 @@ namespace SoftwareMonitoringSystem.Controllers
                         Scan scan = context.Scans.Where(x => x.ScanID == ScanID).FirstOrDefault();
                         if (scan != null)
                         {
-                            context.Scans.Remove(scan);
-                            context.SaveChanges();
+                            var scAndDev = context.ScansAndDevices.Where(x => x.ScanID == ScanID);
+                            if (scAndDev.Count()==0)
+                            {
+                                context.Scans.Remove(scan);
+                                context.SaveChanges();
+                            }
+
+                            Device device = context.Devices.Where(x => x.DeviceID == DeviceID).FirstOrDefault();
+                            if (device!=null)
+                            {
+                                try
+                                {
+                                    string date = scan.ScanDateTime.ToString().Replace(':', '-');
+                                    string path = scanAndDevice.Path;
+                                    if (System.IO.File.Exists(path))
+                                    {
+                                        System.IO.File.Delete(path);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+
+                                }
+                            }
                         }
                         else
                         {
@@ -618,7 +680,7 @@ namespace SoftwareMonitoringSystem.Controllers
                                 // Set IsActive to 1.
                                 newDevice.IPAddress = pair.Value["ipAddress"].ToString();
                                 newDevice.MACAddress = pair.Value["mac"].ToString();
-                                newDevice.Manufacturer = "XYZ";
+                                newDevice.Model = pair.Value["model"].ToString();
                                 context.Devices.Add(newDevice);
                             }
                             else
@@ -640,47 +702,52 @@ namespace SoftwareMonitoringSystem.Controllers
                 client.Timeout = new System.TimeSpan(0, 2, 0);
                 using (var context = new SMSDBContext())
                 {
-                    for (int i = startIndex; i < stopIndex; i++)
+                    Scan scan = context.Scans.Where(x => x.ScanID == scanID).FirstOrDefault();
+                    if (scan != null)
                     {
-                        // Save information about scan to DB - basic info.
-                        ScanAndDevice scanAndDevice = new ScanAndDevice();
-                        scanAndDevice.ScanID = scanID;
-                        scanAndDevice.DeviceID = devices[i].DeviceID;
-                        try
+                        for (int i = startIndex; i < stopIndex; i++)
                         {
-                            string URL = "http://" + devices[i].IPAddress + ":11050/installedSoftware";
-                            HttpResponseMessage response = client.GetAsync(URL).Result;
-                            if (response.IsSuccessStatusCode)
+                            // Save information about scan to DB - basic info.
+                            ScanAndDevice scanAndDevice = new ScanAndDevice();
+                            scanAndDevice.ScanID = scanID;
+                            scanAndDevice.DeviceID = devices[i].DeviceID;
+                            try
                             {
-                                var content = await response.Content.ReadAsStringAsync();
-                                JObject parsedContent = JObject.Parse(content.ToString());
-                                // Save information about scan to DB - is successful = true.
-                                string pathToFile = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans\\" + devices[i].MACAddress;
-                                System.IO.Directory.CreateDirectory(pathToFile);
-                                string date = DateTime.Now.ToString().Replace(':','-');
-                                pathToFile = pathToFile + "\\" + date + ".json";
-                                scanAndDevice.Path = pathToFile;
-                                scanAndDevice.IsSuccessful = 1;
+                                string URL = "http://" + devices[i].IPAddress + ":11050/installedSoftware";
+                                HttpResponseMessage response = client.GetAsync(URL).Result;
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    var content = await response.Content.ReadAsStringAsync();
+                                    JObject parsedContent = JObject.Parse(content.ToString());
+                                    // Save information about scan to DB - is successful = true.
+                                    string pathToFile = System.AppDomain.CurrentDomain.BaseDirectory + "bin\\Scans\\" + devices[i].MACAddress;
+                                    System.IO.Directory.CreateDirectory(pathToFile);
 
-                                // Save result into /folder/file.
-                                System.IO.File.WriteAllText(pathToFile, content);
+                                    string date = scan.ScanDateTime.ToString().Replace(':', '-');
+                                    pathToFile = pathToFile + "\\" + date + ".json";
+                                    scanAndDevice.Path = pathToFile;
+                                    scanAndDevice.IsSuccessful = 1;
+
+                                    // Save result into /folder/file.
+                                    System.IO.File.WriteAllText(pathToFile, content);
+                                }
+                                else
+                                {
+                                    // Save information about scan to DB - is successful = false.
+                                    scanAndDevice.Path = "//";
+                                    scanAndDevice.IsSuccessful = 0;
+                                }
                             }
-                            else
+                            catch (Exception e)
                             {
                                 // Save information about scan to DB - is successful = false.
                                 scanAndDevice.Path = "//";
                                 scanAndDevice.IsSuccessful = 0;
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            // Save information about scan to DB - is successful = false.
-                            scanAndDevice.Path = "//";
-                            scanAndDevice.IsSuccessful = 0;
-                        }
-                        finally
-                        {
-                            context.ScansAndDevices.Add(scanAndDevice);
+                            finally
+                            {
+                                context.ScansAndDevices.Add(scanAndDevice);
+                            }
                         }
                     }
                     context.SaveChanges();

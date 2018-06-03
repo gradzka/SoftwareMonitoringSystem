@@ -24,7 +24,7 @@
         <th></th>
         <th>ID</th>
         <th>Adres MAC</th>
-        <th>Producent</th>
+        <th>Model</th>
         <th>Adres IP</th>
         <th>Opis</th>
         <th>Status</th>
@@ -45,7 +45,7 @@
         {
             @Html.AntiForgeryToken()
             <td>@Html.Editor("MACAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "ff-ff-ff-ff-ff-ff", style = "max-width:160px;", @required = "" } })</td>
-            <td>@Html.Editor("Manufacturer", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Producent", style = "max-width:150px;", @required = "" } })</td>
+            <td>@Html.Editor("_Model", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Model", style = "max-width:150px;", @required = "" } })</td>
             <td>@Html.Editor("IPAddress", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "192.168.0.1", style = "max-width:140px;", @required = "" } })</td>
             <td>@Html.Editor("Description", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Opis", style = "max-width:200px;" } })</td>
             <td colspan="2">
@@ -65,7 +65,7 @@
         <td align="center">@Html.CheckBox("LDev", false, new { @onchange = "checkAll(this)" })</td>
         <td>@Html.Editor("IDFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "ID", style = "max-width:50px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
         <td>@Html.Editor("MACFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres MAC", style = "max-width:160px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
-        <td>@Html.Editor("ManufacturerFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Producent", style = "max-width:150px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
+        <td>@Html.Editor("ModelFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Model", style = "max-width:150px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
         <td>@Html.Editor("IPFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Adres IP", style = "max-width:140px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
         <td>@Html.Editor("DescriptionFilter", "", new { htmlAttributes = new { @class = "form-control", @placeholder = "Opis", style = "max-width:200px;", @name = "", @onkeyup = "FilterDevices()" } })</td>
         <td></td>
@@ -86,7 +86,7 @@
             }
             <td>@Html.DisplayFor(modelItem => item.DeviceID)</td>
             <td>@Html.ActionLink(item.MACAddress, "DevHistory", new { DeviceID = item.DeviceID }, new { style = "color:#0d47a1;", @title = "Przejdź do historii skanowań urządzenia" })</td>
-            <td>@Html.DisplayFor(modelItem => item.Manufacturer)</td>
+            <td>@Html.DisplayFor(modelItem => item.Model)</td>
             <td>@Html.DisplayFor(modelItem => item.IPAddress)</td>
             <td>@Html.DisplayFor(modelItem => item.Description)</td>
             <td>
@@ -130,7 +130,7 @@
                         @Html.Editor("MACAddress", null, "MACAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres MAC", @required = "" } })
                     </div>
                     <div style="margin-bottom:5px;">
-                        @Html.Editor("Manufacturer", null, "Manufacturer", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Producent", @required = "" } })
+                        @Html.Editor("Model", null, "Model", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Model", @required = "" } })
                     </div>
                     <div style="margin-bottom:5px;">
                         @Html.Editor("IPAddress", null, "IPAddress", new { htmlAttributes = new { @class = "form-control", @value = "", @placeholder = "Adres IP", @required = "" } })
@@ -156,7 +156,7 @@
 
             var IDFilter = document.getElementById("IDFilter").value;
             var MACFilter = document.getElementById("MACFilter").value.toUpperCase();
-            var ManufacturerFilter = document.getElementById("ManufacturerFilter").value.toUpperCase();
+            var ModelFilter = document.getElementById("ModelFilter").value.toUpperCase();
             var IPFilter = document.getElementById("IPFilter").value.toUpperCase();
             var DescriptionFilter = document.getElementById("DescriptionFilter").value.toUpperCase();
 
@@ -168,7 +168,7 @@
 
                 if (row.cells[1].textContent.startsWith(IDFilter) &&
                     row.cells[2].textContent.toUpperCase().startsWith(MACFilter) &&
-                    row.cells[3].textContent.toUpperCase().startsWith(ManufacturerFilter) &&
+                    row.cells[3].textContent.toUpperCase().startsWith(ModelFilter) &&
                     row.cells[4].textContent.toUpperCase().startsWith(IPFilter) &&
                     row.cells[5].textContent.toUpperCase().startsWith(DescriptionFilter)) {
                     row.style.display = "";
@@ -190,7 +190,7 @@
                         var contentType = jqxhr.getResponseHeader("Content-Type").split("; ")[0];
                         if (contentType == "application/json") {
                             $("#alertSuccessDevice").hide();
-                            if (response != "Uzupełnij pole Producent" && response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz poprawny adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz poprawny adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
+                            if (response != "Uzupełnij pole Model" && response != "Wpisz inny adres MAC (podany jest zajęty)" && response != "Wpisz poprawny adres MAC" && response != "Wpisz inny adres IP (podany jest zajęty)" && response != "Wpisz poprawny adres IP" && response != "Spróbuj ponownie (błąd wewnętrzny aplikacji)") {
                                 AddDevice(response);
                                 var table = document.getElementById("DeviceTable");
                                 table.rows[1].cells[2].children[0].value = "";
@@ -325,7 +325,7 @@
                 row.cells[0].align = "center";
                 row.cells[1].innerHTML = response.DeviceID;
                 row.cells[2].innerHTML = "<a href=\"/DevMGMT/DevHistory?DeviceID=" + response.DeviceID + "\" style=\"color:#0d47a1;\" title=\"Przejdź do historii skanowań urządzenia\">" + response.MACAddress + "</a>";
-                row.cells[3].innerHTML = response.Manufacturer;
+                row.cells[3].innerHTML = response.Model;
                 row.cells[4].innerHTML = response.IPAddress;
                 row.cells[5].innerHTML = response.Description;
                 row.cells[6].innerHTML = "<span class=\"btn btn-success\" style=\"margin-top: 3px; margin-bottom: 3px\">Aktywny</span>";

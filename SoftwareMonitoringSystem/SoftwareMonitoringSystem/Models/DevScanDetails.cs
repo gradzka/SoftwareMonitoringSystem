@@ -25,7 +25,7 @@ namespace SoftwareMonitoringSystem.Models
         public int FoundSoftware { get; set; }
         public int RecognizedSoftware { get; set; }
         public int UnknownSoftware { get; set; }
-        public string Manufacturer { get; set; }
+        public string Model { get; set; }
         public string System { get; set; }
         public List<Software> Software { get; set; }
     }
