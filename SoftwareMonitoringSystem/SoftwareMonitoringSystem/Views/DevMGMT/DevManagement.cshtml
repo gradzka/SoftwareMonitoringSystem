@@ -254,10 +254,12 @@
                         else {
                             document.location.href = "/";
                         }
+                        document.getElementsByName("RDev")[0].click()
                     })
                     .fail(function (jqxhr, status, error) {
                         $("#alertErrorDevice")[0].innerHTML = 'Uwaga! '.bold() + "Spróbuj ponownie (błąd wewnętrzny aplikacji)";
                         $("#alertErrorDevice").show();
+                        document.getElementsByName("RDev")[0].click()
                     })
             })
 
